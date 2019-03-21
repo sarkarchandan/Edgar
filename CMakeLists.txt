@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.1...3.13)
 if(${CMAKE_VERSION} VERSION_LESS 3.13)
   cmake_policy(VERSION ${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION})
 endif()
-project(Edgar VERSION 1.0 DESCRIPTION "A over-simplified prototypical implementation for databases and CRUD operations" LANGUAGES CXX)
+project(Edgar VERSION 1.0 DESCRIPTION "An over-simplified prototypical implementation for databases and CRUD operations" LANGUAGES CXX)
 include(CTest)
 
 if(NOT TARGET gtest OR NOT TARGET gtest_main OR NOT TARGET gmock OR NOT TARGET gmock_main)

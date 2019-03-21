@@ -1,0 +1,21 @@
+cmake_minimum_required(VERSION 3.1...3.13)
+if(${CMAKE_VERSION} VERSION_LESS 3.13)
+  cmake_policy(VERSION  ${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION})
+endif()
+project(EdgarTestSuite VERSION 1.0 DESCRIPTION "A test suite to test features that Edgar library offers" LANGUAGES CXX)
+
+target_compile_features(gtest PUBLIC cxx_std_11)
+target_compile_features(gtest_main PUBLIC cxx_std_11)
+target_compile_features(gmock PUBLIC cxx_std_11)
+target_compile_features(gmock_main PUBLIC cxx_std_11)
+
+macro(PACKAGE_ADD_TEST TEST_NAME)
+  add_executable(${TEST_NAME} ${ARGN})
+  target_include_directories(${TEST_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/include)
+  target_link_libraries(${TEST_NAME} Edgar)
+  target_link_libraries(${TEST_NAME} gtest gmock gtest_main)
+  add_test(${TEST_NAME} ${TEST_NAME})
+  set_target_properties(${TEST_NAME} PROPERTIES FOLDER tests)
+endmacro()
+
+PACKAGE_ADD_TEST(edgar_test edgar_test.cpp)

@@ -18,7 +18,7 @@ namespace database
     std::size_t m_number_of_columns;
     std::size_t m_row_capacity;
     std::size_t m_number_of_rows;
-    std::string *m_column_names;
+    std::unordered_map<std::string,std::string> m_columns_metadata;
     std::string **m_columns;
 
     friend class TransactionFactory;
@@ -30,7 +30,7 @@ namespace database
     {
       std::hash<std::string> string_hash;
       m_table_id = string_hash(m_table_name);
-      m_column_names = new std::string[m_number_of_columns];
+      m_columns_metadata = new std::string[m_number_of_columns];
 
       m_columns = new std::string*[m_number_of_columns * sizeof(std::string*)];
       for(std::size_t i = 0; i < m_number_of_columns; i += 1)
@@ -41,7 +41,7 @@ namespace database
     public:
     ~Table()
     {
-      delete[] m_column_names;
+      delete[] m_columns_metadata;
       for(std::size_t i = 0; i < m_number_of_columns; i += 1)
         delete[] *(m_columns + i);
       delete[] m_columns;
@@ -56,9 +56,9 @@ namespace database
       this -> m_row_capacity = table.m_row_capacity;
       this -> m_number_of_rows = table.m_number_of_rows;
       
-      this -> m_column_names = new std::string[m_number_of_columns];
+      this -> m_columns_metadata = new std::string[m_number_of_columns];
       for(std::size_t i = 0; i < m_number_of_columns; i += 1)
-        *(m_column_names + i) = *(table.m_column_names + i);
+        *(m_columns_metadata + i) = *(table.m_columns_metadata + i);
         
       this -> m_columns = new std::string*[m_number_of_columns * sizeof(std::string*)];
       for(std::size_t i = 0; i < m_number_of_columns; i += 1)
@@ -102,8 +102,8 @@ namespace database
       _AdjustRowsIfNeeded();
       for(std::size_t i = 0; i < m_number_of_columns; i += 1)
       { 
-        if(values.find(*(m_column_names + i)) != values.end())
-          m_columns[i][m_number_of_rows] = values.at(*(m_column_names + i));
+        if(values.find(*(m_columns_metadata + i)) != values.end())
+          m_columns[i][m_number_of_rows] = values.at(*(m_columns_metadata + i));
         else
           m_columns[i][m_number_of_rows] = "NULL";
       }
@@ -114,7 +114,7 @@ namespace database
     {
       for(std::size_t i = 0; i < m_number_of_columns; i += 1)
       {
-        if(*(m_column_names + i) == key)
+        if(*(m_columns_metadata + i) == key)
           return i;
       }
       return -1;
@@ -141,10 +141,10 @@ namespace database
       {
         for(std::size_t j: buffer)
         {
-          if(result.find(m_column_names[i]) == result.end())
-            result[m_column_names[i]] = {m_columns[i][j]};
+          if(result.find(m_columns_metadata[i]) == result.end())
+            result[m_columns_metadata[i]] = {m_columns[i][j]};
           else
-            result[m_column_names[i]].emplace_back(m_columns[i][j]);
+            result[m_columns_metadata[i]].emplace_back(m_columns[i][j]);
         }   
       }
       return result;

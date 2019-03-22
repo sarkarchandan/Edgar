@@ -18,4 +18,4 @@ macro(PACKAGE_ADD_TEST TEST_NAME)
   set_target_properties(${TEST_NAME} PROPERTIES FOLDER tests)
 endmacro()
 
-PACKAGE_ADD_TEST(edgar_test edgar_test.cpp)
+PACKAGE_ADD_TEST(tests_database_date database_date.cpp)

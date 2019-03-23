@@ -38,6 +38,18 @@ TEST(DateTests,canCreateDates)
   ASSERT_EQ(date6.month(),02);
   ASSERT_EQ(date6.year(),2014);
   ASSERT_EQ(date6.serialized_value(),20140219);
+
+  database::Date date7 = database::Date::With_yyyymmdd("20031202");
+  database::Date date8 = database::Date::With_yyyy_mm_dd(2003,12,02);
+  ASSERT_TRUE(date7 == date8);
+
+  database::Date date9 = database::Date::With_mmddyyyy("7281986");
+  database::Date date10 = database::Date::With_mm_dd_yyyy(07,28,1986);
+  ASSERT_TRUE(date9 == date10);
+
+  database::Date date11 = database::Date::With_ddmmyyyy("19022014");
+  database::Date date12 = database::Date::With_dd_mm_yyyy(19,02,2014);
+  ASSERT_TRUE(date11 == date12);
 }
 
 TEST(DateTests_ExceptionTests,canValidate)

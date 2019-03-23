@@ -3,6 +3,7 @@
 #include <cstdlib>
 #include <exception>
 #include <unordered_map>
+#include <string>
 
 namespace database
 {
@@ -64,27 +65,6 @@ namespace database
         }
       }
     }
-    // int32_t _DaysBetweenYears(const int32_t& lhs, const int32_t& rhs) const
-    // {      
-    //   if(lhs == rhs) return 0;
-    //   int32_t raw_year_days = 0;
-    //   if(lhs < rhs)
-    //   {
-    //     for(int32_t i = lhs; i < rhs; i += 1)
-    //     {
-    //       if(_IsLeapYear(i)) raw_year_days += 366;
-    //       else raw_year_days += 365;
-    //     }
-    //   }else
-    //   {
-    //     for(int32_t i = rhs; i < lhs; i += 1)
-    //     {
-    //       if(_IsLeapYear(i)) raw_year_days += 366;
-    //       else raw_year_days += 365;
-    //     }
-    //   }
-    //   return raw_year_days;
-    // }
     Date(const int32_t& year, const int32_t& month, const int32_t& day)
     {
       _Validate(year,month,day);
@@ -143,40 +123,6 @@ namespace database
       return (*this != date) && !(*this < date);
     }
 
-    // int32_t Days_Until(const database::Date& later_date) const
-    // {
-    //   if(later_date < *this)
-    //     throw std::invalid_argument("Argument has an earlier date");
-    //   if(later_date == *this) return 0;
-    //   else
-    //   {
-    //     int32_t raw_month_days = 0;
-    //     int32_t index = month();
-
-    //     while()
-    //     {
-    //       while(index != later_date.month())
-    //       {
-    //         std::cout << "Index: " << index << "\n";
-    //         if(index != 0) raw_month_days += m_days_of_months.at(index);
-    //         index = (index + 1) % 13;
-    //       }
-    //     }
-
-    //     std::cout << "Raw days difference in months: " << raw_difference_months << "\n";
-
-    //     if(month() < later_date.month())
-    //       raw_difference_years += raw_difference_months;
-    //     else 
-    //       raw_difference_years -= raw_difference_months;
-        
-    //     int32_t raw_difference_days = day() - later_date.day();
-    //     return raw_difference_years + raw_difference_days;
-    //   }
-    // }
-
-    // int32_t Days_From(const database::Date& earlier_date) const;
-
     #pragma mark Static methods to create date
     //This is because with the default initializers, the relative positions for the components are ambiguous.
     static Date With_yyyy_mm_dd(const int32_t& year, const int32_t& month, const int32_t& day)
@@ -209,9 +155,22 @@ namespace database
       int32_t day = year_component_remainder % 100;
       return Date(year,month,day);
     }
+    static Date With_yyyymmdd(const std::string& string_value)
+    {
+      int32_t serialized_value = std::stoi(string_value);
+      return With_yyyymmdd(serialized_value);
+    }
+    static Date With_ddmmyyyy(const std::string& string_value)
+    {
+      const int32_t serialized_value = std::stoi(string_value);
+      return With_ddmmyyyy(serialized_value);
+    }
+    static Date With_mmddyyyy(const std::string& string_value)
+    {
+      const int32_t serialized_value = std::stoi(string_value);
+      return With_mmddyyyy(serialized_value);
+    }
   };
 }
-
-// int32_t operator - (const database::Date& lhs, const database::Date& rhs);
 
 #endif //DATE_H

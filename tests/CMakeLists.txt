@@ -19,3 +19,4 @@ macro(PACKAGE_ADD_TEST TEST_NAME)
 endmacro()
 
 PACKAGE_ADD_TEST(tests_database_date database_date.cpp)
+PACKAGE_ADD_TEST(tests_database_container database_container.cpp)

@@ -3,7 +3,7 @@
 #include <cstdlib>
 #include <exception>
 #include <unordered_map>
-#include <string>
+#include "ComparableString.hpp"
 
 namespace database
 {
@@ -82,15 +82,19 @@ namespace database
     int32_t year() const { return m_year; }
     int32_t month() const {return m_month; }
     int32_t serialized_value() const { return m_serialized_value; }
+    database::ComparableString string_value() const
+    {
+      std::string string = "";
+      string += m_serialized_value;
+      database::ComparableString comparable_string = string;
+      return comparable_string;
+    }
     
     inline bool operator == (const database::Date& date) const
     {
       return this -> m_year == date.m_year && this -> m_month == date.m_month && this -> m_day == date.m_day;
     }
-    inline bool operator != (const database::Date& date) const
-    {
-      return !(*this == date);
-    }
+    inline bool operator != (const database::Date& date) const { return !(*this == date); }
     inline bool operator < (const database::Date& date) const
     {
       if(*this == date) return false;
@@ -118,19 +122,15 @@ namespace database
         else return false;
       }
     }
-    inline bool operator > (const database::Date& date) const
-    {
-      return (*this != date) && !(*this < date);
-    }
+    inline bool operator > (const database::Date& date) const { return (*this != date) && !(*this < date); }
+    inline bool operator <= (const database::Date& date) const { return (*this < date) || (*this == date); }
+    inline bool operator >= (const database::Date& date) const { return (*this > date) || (*this == date); }
 
     #pragma mark Static methods to create date
     //This is because with the default initializers, the relative positions for the components are ambiguous.
-    static Date With_yyyy_mm_dd(const int32_t& year, const int32_t& month, const int32_t& day)
-    { return Date(year,month,day); }
-    static Date With_dd_mm_yyyy(const int32_t& day, const int32_t& month, const int32_t& year)
-    { return Date(year,month,day); }
-    static Date With_mm_dd_yyyy(const int32_t& month, const int32_t& day, const int32_t& year)
-    { return Date(year,month,day); }
+    static Date With_yyyy_mm_dd(const int32_t& year, const int32_t& month, const int32_t& day) { return Date(year,month,day); }
+    static Date With_dd_mm_yyyy(const int32_t& day, const int32_t& month, const int32_t& year) { return Date(year,month,day); }
+    static Date With_mm_dd_yyyy(const int32_t& month, const int32_t& day, const int32_t& year) { return Date(year,month,day); }
     static Date With_yyyymmdd(const int32_t& serialized_value)
     {
       int32_t year = serialized_value / 10000;
@@ -155,19 +155,19 @@ namespace database
       int32_t day = year_component_remainder % 100;
       return Date(year,month,day);
     }
-    static Date With_yyyymmdd(const std::string& string_value)
+    static Date With_yyyymmdd(const database::ComparableString& comparable_string)
     {
-      int32_t serialized_value = std::stoi(string_value);
+      int32_t serialized_value = std::stoi(comparable_string.m_string);
       return With_yyyymmdd(serialized_value);
     }
-    static Date With_ddmmyyyy(const std::string& string_value)
+    static Date With_ddmmyyyy(const database::ComparableString& comparable_string)
     {
-      const int32_t serialized_value = std::stoi(string_value);
+      const int32_t serialized_value = std::stoi(comparable_string.m_string);
       return With_ddmmyyyy(serialized_value);
     }
-    static Date With_mmddyyyy(const std::string& string_value)
+    static Date With_mmddyyyy(const database::ComparableString& comparable_string)
     {
-      const int32_t serialized_value = std::stoi(string_value);
+      const int32_t serialized_value = std::stoi(comparable_string.m_string);
       return With_mmddyyyy(serialized_value);
     }
   };

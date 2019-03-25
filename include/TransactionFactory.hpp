@@ -41,7 +41,7 @@ namespace database
      * @param comparison types for the criteria
      * @param columns for which data should be selected
     */
-    static std::map<std::string,std::vector<database::ComparableString>> SelectWithCriteriaFrom(const database::Container& container,const std::map<std::string,database::ComparableString>& filter_criteria,const std::vector<database::ValueComparisonType>& filter_comparison_types,const std::vector<std::string>& required_columns);
+    static void SelectWithCriteriaFrom(const database::Container& container,const std::map<std::string,database::ComparableString>& filter_criteria,const std::vector<database::ValueComparisonType>& filter_comparison_types,const std::vector<std::string>& required_columns,const std::function<void(const std::map<std::string,std::vector<database::ComparableString>>&)>& lambda);
 
     // void Update(database::Container& container,const std::map<std::string,std::string>& values,std::map<std::string,std::string>& where);
     // void DeleteFrom(database::Container& container,const std::map<std::string,std::string>& where);

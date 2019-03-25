@@ -64,7 +64,7 @@ namespace database
     bool _IsValidFilterCriteria(const std::map<std::string,database::ComparableString>& filter_criteria) const;
     void _PopulateValueIfNotExisting(std::vector<std::size_t>& vector,const std::size_t& value) const;
     void _SelectAll(const std::function<void(const std::map<std::string,std::vector<database::ComparableString>>&)>& lambda) const;
-    std::map<std::string,std::vector<database::ComparableString>> _SelectWithCriteria(const std::map<std::string,database::ComparableString>& filter_criteria,const std::vector<database::ValueComparisonType>& filter_comparison_types) const;
+    void _SelectWithCriteria(const std::map<std::string,database::ComparableString>& filter_criteria,const std::vector<database::ValueComparisonType>& filter_comparison_types,const std::vector<std::string>& required_columns,const std::function<void(const std::map<std::string,std::vector<database::ComparableString>>&)>& lambda) const;
   };
 }
 

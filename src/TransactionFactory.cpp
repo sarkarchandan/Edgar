@@ -16,8 +16,7 @@ void database::TransactionFactory::SelectAllFrom(const database::Container& cont
   container._SelectAll(lambda);
 }
 
-std::map<std::string,std::vector<database::ComparableString>> database::TransactionFactory::SelectWithCriteriaFrom(const database::Container& container,const std::map<std::string,database::ComparableString>& filter_criteria,const std::vector<database::ValueComparisonType>& filter_comparison_types,const std::vector<std::string>& required_columns)
+void database::TransactionFactory::SelectWithCriteriaFrom(const database::Container& container,const std::map<std::string,database::ComparableString>& filter_criteria,const std::vector<database::ValueComparisonType>& filter_comparison_types,const std::vector<std::string>& required_columns,const std::function<void(const std::map<std::string,std::vector<database::ComparableString>>&)>& lambda)
 {
-  std::map<std::string,std::vector<database::ComparableString>> result = container._SelectWithCriteria(filter_criteria,filter_comparison_types);
-  return result;
+  container._SelectWithCriteria(filter_criteria,filter_comparison_types,required_columns,lambda);
 }

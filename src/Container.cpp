@@ -65,7 +65,7 @@ void database::Container::_SelectAll(const std::function<void(const std::map<std
   lambda(result);
 }
 
-std::map<std::string,std::vector<database::ComparableString>> database::Container::_SelectWithCriteria(const std::map<std::string,database::ComparableString>& filter_criteria,const std::vector<database::ValueComparisonType>& filter_comparison_types) const
+void database::Container::_SelectWithCriteria(const std::map<std::string,database::ComparableString>& filter_criteria,const std::vector<database::ValueComparisonType>& filter_comparison_types,const std::vector<std::string>& required_columns,const std::function<void(const std::map<std::string,std::vector<database::ComparableString>>&)>& lambda) const
 {
   if(!_IsValidFilterCriteria(filter_criteria)) //Check validity of the provided key-value against defined schema
     throw std::runtime_error("Select attempted with invalid columns");
@@ -155,7 +155,7 @@ std::map<std::string,std::vector<database::ComparableString>> database::Containe
 
     result[pair.first] = data_buffer;
   }); //Iterating over the schema
-  return result;
+  lambda(result);
 }
 
 

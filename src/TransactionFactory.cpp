@@ -11,14 +11,13 @@ void database::TransactionFactory::InsertInto(database::Container& container, co
   container._InsertInto(values);
 }
 
-std::map<std::string,std::vector<database::ComparableString>> database::TransactionFactory::SelectAllFrom(const database::Container& container)
+void database::TransactionFactory::SelectAllFrom(const database::Container& container,const std::function<void(const std::map<std::string,std::vector<database::ComparableString>>&)>& lambda)
 {
-  std::map<std::string,std::vector<database::ComparableString>> result = container._SelectAll();
-  return result;
+  container._SelectAll(lambda);
 }
 
-// std::map<std::string,std::vector<database::ComparableString>> database::TransactionFactory::SelectAllWithCriteriaFrom(const database::Container& container,const std::map<std::string,database::ComparableString>& filter_criteria,const std::vector<database::ValueComparisonType>& filter_comparison_types)
-// {
-//   std::map<std::string,std::vector<database::ComparableString>> result = container._SelectAllWithCriteria(filter_criteria,filter_comparison_types);
-//   return result;
-// }
+std::map<std::string,std::vector<database::ComparableString>> database::TransactionFactory::SelectWithCriteriaFrom(const database::Container& container,const std::map<std::string,database::ComparableString>& filter_criteria,const std::vector<database::ValueComparisonType>& filter_comparison_types,const std::vector<std::string>& required_columns)
+{
+  std::map<std::string,std::vector<database::ComparableString>> result = container._SelectWithCriteria(filter_criteria,filter_comparison_types);
+  return result;
+}

@@ -55,17 +55,17 @@ void database::Container::_PopulateValueIfNotExisting(std::vector<std::size_t>& 
   else return;
 }
 
-std::map<std::string,std::vector<database::ComparableString>> database::Container::_SelectAll() const
+void database::Container::_SelectAll(const std::function<void(const std::map<std::string,std::vector<database::ComparableString>>&)>& lambda) const
 {
   std::map<std::string,std::vector<database::ComparableString>> result;
   std::for_each(m_schema.begin(),m_schema.end(),[&](auto pair){
     std::size_t index = std::distance(m_schema.begin(),m_schema.find(pair.first));
     result[pair.first] = m_data -> operator[](index);
   });
-  return result;
+  lambda(result);
 }
 
-std::map<std::string,std::vector<database::ComparableString>> database::Container::_SelectAllWithCriteria(const std::map<std::string,database::ComparableString>& filter_criteria,const std::vector<database::ValueComparisonType>& filter_comparison_types) const
+std::map<std::string,std::vector<database::ComparableString>> database::Container::_SelectWithCriteria(const std::map<std::string,database::ComparableString>& filter_criteria,const std::vector<database::ValueComparisonType>& filter_comparison_types) const
 {
   if(!_IsValidFilterCriteria(filter_criteria)) //Check validity of the provided key-value against defined schema
     throw std::runtime_error("Select attempted with invalid columns");

@@ -4,6 +4,11 @@
 #include<vector>
 #include<map>
 
+std::ostream& operator <<(std::ostream& stream, const database::ComparableString& string)
+{
+  stream << string.m_string;
+  return stream;
+}
 
 template<typename Type>
 std::ostream& operator <<(std::ostream& stream, const std::vector<Type>& vector)
@@ -20,12 +25,6 @@ std::ostream& operator <<(std::ostream& stream, std::map<std::string,std::vector
   std::for_each(structure.begin(),structure.end(),[&](auto pair){
     stream << pair.first << "\t" << pair.second << "\n";
   });
-  return stream;
-}
-
-std::ostream& operator <<(std::ostream& stream, const database::ComparableString& string)
-{
-  stream << string.m_string;
   return stream;
 }
 

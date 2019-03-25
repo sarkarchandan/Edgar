@@ -6,7 +6,7 @@ project(Edgar VERSION 1.0 DESCRIPTION "An over-simplified prototypical implement
 include(CTest)
 
 if(NOT TARGET gtest OR NOT TARGET gtest_main OR NOT TARGET gmock OR NOT TARGET gmock_main)
-  
+
   include(FetchContent)
 
   FetchContent_Declare(
@@ -22,10 +22,13 @@ if(NOT TARGET gtest OR NOT TARGET gtest_main OR NOT TARGET gmock OR NOT TARGET g
   endif()
 
 endif()
+set(SOURCES
+    src/Container.cpp
+    src/TransactionFactory.cpp)
 
-add_library(Edgar INTERFACE)
-target_include_directories(Edgar INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/include)
-target_compile_features(Edgar INTERFACE cxx_std_14)
+add_library(Edgar SHARED ${SOURCES})
+target_include_directories(Edgar PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
+target_compile_features(Edgar PUBLIC cxx_std_14)
 
 option(PACKAGE_TEST "Build for tests" ON)
 if(PACKAGE_TEST)

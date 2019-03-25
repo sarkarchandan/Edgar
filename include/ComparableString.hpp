@@ -30,12 +30,6 @@ namespace database
     inline bool operator <= (const database::ComparableString& string) const { return (*this < string) || (*this == string); }
     inline bool operator >= (const database::ComparableString& string) const { return (*this > string) || (*this == string); }
   };
-
-  std::ostream& operator <<(std::ostream& stream, const database::ComparableString& string)
-  {
-    stream << string.m_string;
-    return stream;
-  }
 }
 
 #endif //COMPARABLE_STRING_H

@@ -11,7 +11,7 @@ target_compile_features(gmock_main PUBLIC cxx_std_11)
 
 macro(PACKAGE_ADD_TEST TEST_NAME)
   add_executable(${TEST_NAME} ${ARGN})
-  target_include_directories(${TEST_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/include)
+  target_include_directories(${TEST_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/include)
   target_link_libraries(${TEST_NAME} Edgar)
   target_link_libraries(${TEST_NAME} gtest gmock gtest_main)
   add_test(${TEST_NAME} ${TEST_NAME})

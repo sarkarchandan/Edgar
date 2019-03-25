@@ -1,6 +1,5 @@
 #include "gtest/gtest.h"
 #include "TransactionFactory.hpp"
-#include "Utility.hpp"
 
 TEST(ContainerTests,canInitializeContainer)
 {

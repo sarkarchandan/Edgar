@@ -1,9 +1,9 @@
 #ifndef UTILITY_H
 #define UTILITY_H
-#include<iostream>
-#include<unordered_map>
-#include<vector>
 #include "ComparableString.hpp"
+#include<vector>
+#include<map>
+
 
 template<typename Type>
 std::ostream& operator <<(std::ostream& stream, const std::vector<Type>& vector)
@@ -22,5 +22,12 @@ std::ostream& operator <<(std::ostream& stream, std::map<std::string,std::vector
   });
   return stream;
 }
+
+std::ostream& operator <<(std::ostream& stream, const database::ComparableString& string)
+{
+  stream << string.m_string;
+  return stream;
+}
+
 
 #endif //UTILITY_H

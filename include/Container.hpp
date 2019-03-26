@@ -61,10 +61,12 @@ namespace database
     void _InsertInto(const std::map<std::string,database::ComparableString> values);
 
     //Select all from container with given selection criteria
-    bool _IsValidFilterCriteria(const std::map<std::string,database::ComparableString>& filter_criteria) const;
-    void _PopulateValueIfNotExisting(std::vector<std::size_t>& vector,const std::size_t& value) const;
+    bool _IsValidFilterCriteriaForRawSelection(const std::map<std::string,std::vector<database::ComparableString>>& filter_criteria) const;
+    bool _IsValidFilterCriteriaForAggregateSelection(const std::map<std::string,std::vector<database::ComparableString>>& filter_criteria) const;
+    // bool _IsValidFilteringInformation(const std::map<std::string,std::vector<database::ComparableString>>& filter_criteria, const std::map<std::string,std::vector<database::ComparisonType>>& filter_comparison_params) const;
+    // void _PopulateValueIfNotExisting(std::vector<std::size_t>& vector,const std::size_t& value) const;
     void _SelectAll(const std::function<void(const std::map<std::string,std::vector<database::ComparableString>>&)>& lambda) const;
-    void _SelectRawWithCriteria(const std::map<std::string,std::vector<database::ComparableString>>& filter_criteria,const std::map<std::string,std::vector<database::ComparisonType>>& filter_comparison_params,const std::map<std::string,std::vector<database::AssociationType>>& filter_association_params,const std::vector<std::string>& dataset,const std::function<void(const std::map<std::string,std::vector<database::ComparableString>>&)>& lambda) const;
+    void _SelectRawWithCriteria(const std::map<std::string,std::vector<database::ComparableString>>& filter_criteria,const std::map<std::string,std::vector<database::ComparisonType>>& filter_comparison_params,const std::vector<std::string>& dataset,const std::function<void(const std::map<std::string,std::vector<database::ComparableString>>&)>& lambda) const;
   };
 }
 

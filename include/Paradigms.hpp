@@ -13,13 +13,13 @@ namespace database
     lesser_than
   };
 
-  enum AssociationType
-  {
-    logical_and,
-    logical_or,
-    logical_not,
-    none
-  };
+  // enum AssociationType
+  // {
+  //   logical_and,
+  //   logical_or,
+  //   logical_not,
+  //   none
+  // };
 
   enum PresentationType
   {

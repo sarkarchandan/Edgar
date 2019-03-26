@@ -63,6 +63,7 @@ namespace database
     //Select all from container with given selection criteria
     bool _IsValidFilterCriteriaForRawSelection(const std::map<std::string,std::vector<database::ComparableString>>& filter_criteria) const;
     bool _IsValidFilterCriteriaForAggregateSelection(const std::map<std::string,std::vector<database::ComparableString>>& filter_criteria) const;
+    bool _IsValidDataSetRequested(const std::vector<std::string>& dataset) const;
     // bool _IsValidFilteringInformation(const std::map<std::string,std::vector<database::ComparableString>>& filter_criteria, const std::map<std::string,std::vector<database::ComparisonType>>& filter_comparison_params) const;
     // void _PopulateValueIfNotExisting(std::vector<std::size_t>& vector,const std::size_t& value) const;
     void _SelectAll(const std::function<void(const std::map<std::string,std::vector<database::ComparableString>>&)>& lambda) const;

@@ -19,7 +19,7 @@ namespace database
      * @param name of the container
      * @param schema for the container
     */
-    static database::Container ContainerWith_Name_Schema(const std::string& container_name, const std::map<std::string,std::string>& container_schema);
+    static database::Container ContainerWith_Name_Schema(const std::string& container_name, const std::map<std::string,DataType>& container_schema);
 
     /**
      * Inserts data into the container
@@ -37,14 +37,14 @@ namespace database
     /**
      * Selects data from the container based based on some criteria
      * @param container
-     * @param criteria for filtering
-     * @param comparison types for the criteria
+     * @param key-values which should be consideried for filtering of data
+     * @param key_values which should be regarded for comparison of data for filtering
+     * @param key-values whcih should be regarded for logical association for filtering
      * @param columns for which data should be selected
+     * @param lambda function where the result is expected
     */
-    static void SelectWithCriteriaFrom(const database::Container& container,const std::map<std::string,database::ComparableString>& filter_criteria,const std::vector<database::ValueComparisonType>& filter_comparison_types,const std::vector<std::string>& required_columns,const std::function<void(const std::map<std::string,std::vector<database::ComparableString>>&)>& lambda);
+    static void SelectRawWithCriteriaFrom(const database::Container& container,const std::map<std::string,std::vector<database::ComparableString>>& filter_criteria,const std::map<std::string,std::vector<database::ComparisonType>>& filter_comparison_params,const std::map<std::string,std::vector<database::AssociationType>>& filter_association_params,const std::vector<std::string>& dataset,const std::function<void(const std::map<std::string,std::vector<database::ComparableString>>&)>& lambda);
 
-    // void Update(database::Container& container,const std::map<std::string,std::string>& values,std::map<std::string,std::string>& where);
-    // void DeleteFrom(database::Container& container,const std::map<std::string,std::string>& where);
   };
 }
 

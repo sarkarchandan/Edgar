@@ -3,7 +3,7 @@
 
 namespace database
 {
-  enum ValueComparisonType
+  enum ComparisonType
   {
     equal_to,
     not_eqaul_to,
@@ -13,20 +13,35 @@ namespace database
     lesser_than
   };
 
-  enum ValuePresentationType
+  enum AssociationType
+  {
+    logical_and,
+    logical_or,
+    logical_not,
+    none
+  };
+
+  enum PresentationType
   {
     group_by,
     order_by
   };
 
-  // enum ValueAggregationType
-  // {
-  //   count,
-  //   average,
-  //   min,
-  //   max,
-  //   sum
-  // };
+  enum DataType
+  {
+    quantifiable,
+    non_quantifiable,
+    other
+  };
+
+  enum AggregationType
+  {
+    count,
+    average,
+    min,
+    max,
+    sum
+  };
 }
 
 #endif //PARADIGMS_H

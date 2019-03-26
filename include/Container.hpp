@@ -17,14 +17,14 @@ namespace database
     private:
     std::size_t m_id;
     std::string m_name;
-    std::map<std::string,std::string> m_schema;
+    std::map<std::string,database::DataType> m_schema;
     std::unique_ptr<std::vector<std::vector<database::ComparableString>>> m_data;
 
     friend class TransactionFactory;
 
     #pragma mark Private initializer
     private:
-    Container(const std::string& name,const std::map<std::string,std::string>& schema)
+    Container(const std::string& name,const std::map<std::string,database::DataType>& schema)
     :m_name(name),m_schema(schema) { _PrepareContainer(); }
     Container() = delete;
     #pragma mark Public deallocator,copy initializers and accessors
@@ -50,21 +50,21 @@ namespace database
     }
     std::string name() const;
     std::size_t id() const;
-    std::map<std::string,std::string> schema() const;
+    std::map<std::string,database::DataType> schema() const;
 
     #pragma mark Private implementation layer
     private:
     void _PrepareContainer();
 
     //Insert Into Container
-    bool _HaveSameKeysFor(const std::map<std::string,database::ComparableString>& lhs, const std::map<std::string,std::string>& rhs) const;
+    bool _HaveSameKeysFor(const std::map<std::string,database::ComparableString>& lhs, const std::map<std::string,database::DataType>& rhs) const;
     void _InsertInto(const std::map<std::string,database::ComparableString> values);
 
     //Select all from container with given selection criteria
     bool _IsValidFilterCriteria(const std::map<std::string,database::ComparableString>& filter_criteria) const;
     void _PopulateValueIfNotExisting(std::vector<std::size_t>& vector,const std::size_t& value) const;
     void _SelectAll(const std::function<void(const std::map<std::string,std::vector<database::ComparableString>>&)>& lambda) const;
-    void _SelectWithCriteria(const std::map<std::string,database::ComparableString>& filter_criteria,const std::vector<database::ValueComparisonType>& filter_comparison_types,const std::vector<std::string>& required_columns,const std::function<void(const std::map<std::string,std::vector<database::ComparableString>>&)>& lambda) const;
+    void _SelectRawWithCriteria(const std::map<std::string,std::vector<database::ComparableString>>& filter_criteria,const std::map<std::string,std::vector<database::ComparisonType>>& filter_comparison_params,const std::map<std::string,std::vector<database::AssociationType>>& filter_association_params,const std::vector<std::string>& dataset,const std::function<void(const std::map<std::string,std::vector<database::ComparableString>>&)>& lambda) const;
   };
 }
 

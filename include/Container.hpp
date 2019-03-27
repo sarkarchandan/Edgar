@@ -56,18 +56,27 @@ namespace database
     private:
     void _PrepareContainer();
 
-    //Insert Into Container
+    //Insert data into Container
     bool _HaveSameKeysFor(const std::map<std::string,database::ComparableString>& lhs, const std::map<std::string,database::DataType>& rhs) const;
     void _InsertInto(const std::map<std::string,database::ComparableString> values);
 
-    //Select all from container with given selection criteria
+    //Select from container with given filter criteria
     bool _IsValidFilterCriteriaForRawSelection(const std::map<std::string,std::vector<database::ComparableString>>& filter_criteria) const;
     bool _IsValidFilterCriteriaForAggregateSelection(const std::map<std::string,std::vector<database::ComparableString>>& filter_criteria) const;
     bool _IsValidDataSetRequested(const std::vector<std::string>& dataset) const;
-    // bool _IsValidFilteringInformation(const std::map<std::string,std::vector<database::ComparableString>>& filter_criteria, const std::map<std::string,std::vector<database::ComparisonType>>& filter_comparison_params) const;
-    // void _PopulateValueIfNotExisting(std::vector<std::size_t>& vector,const std::size_t& value) const;
     void _SelectAll(const std::function<void(const std::map<std::string,std::vector<database::ComparableString>>&)>& lambda) const;
+    void _SelectDataSet(const std::vector<std::string>& dataset,const std::function<void(const std::map<std::string,std::vector<database::ComparableString>>&)>& lambda) const;
     void _SelectRawWithCriteria(const std::map<std::string,std::vector<database::ComparableString>>& filter_criteria,const std::map<std::string,std::vector<database::ComparisonType>>& filter_comparison_params,const std::vector<std::string>& dataset,const std::function<void(const std::map<std::string,std::vector<database::ComparableString>>&)>& lambda) const;
+
+    //Update data in the container with given filter criteria
+    void _UpdateValueForIndex(const std::size_t& index,const std::map<std::string,database::ComparableString>& new_value);
+    void _Update(const std::map<std::string,std::vector<database::ComparableString>>& filter_criteria,const std::map<std::string,std::vector<database::ComparisonType>>& filter_comparison_params,const std::map<std::string,database::ComparableString>& new_value);
+
+    //Delete data from container with given filter criteria
+    void _DeleteFrom(const std::map<std::string,std::vector<database::ComparableString>>& filter_criteria,const std::map<std::string,std::vector<database::ComparisonType>>& filter_comparison_params);
+
+    //Delete all data from the container keeping the schema intact
+    void _Truncate();
   };
 }
 

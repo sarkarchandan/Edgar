@@ -44,9 +44,13 @@ bool database::Container::_IsValidFilterCriteriaForRawSelection(const std::map<s
   return true;
 }
 
-bool database::Container::_IsValidFilterCriteriaForAggregateSelection(const std::map<std::string,std::vector<database::ComparableString>>& filter_criteria) const { return true; }
+bool database::Container::_IsValidFilterCriteriaForAggregateSelection(const std::map<std::string,std::vector<database::ComparableString>>& filter_criteria) const
+{
+  #pragma mark TODO: Needs to implement
+  return true;
+}
 
-bool _IsValidFilteringInformation(const std::map<std::string,std::vector<database::ComparableString>>& filter_criteria, const std::map<std::string,std::vector<database::ComparisonType>>& filter_comparison_params) 
+bool _IsValidFilteringInformation(const std::map<std::string,std::vector<database::ComparableString>>& filter_criteria, const std::map<std::string,std::vector<database::ComparisonType>>& filter_comparison_params)
 {
   return (filter_criteria.size() == filter_comparison_params.size()) && std::equal(filter_criteria.begin(),filter_criteria.end(),filter_comparison_params.begin(),[&](auto lhs_pair,auto rhs_pair){
     return (lhs_pair.first == rhs_pair.first) && (lhs_pair.second.size() == rhs_pair.second.size());
@@ -80,11 +84,30 @@ void database::Container::_SelectAll(const std::function<void(const std::map<std
   lambda(result);
 }
 
+void database::Container::_SelectDataSet(const std::vector<std::string>& dataset,const std::function<void(const std::map<std::string,std::vector<database::ComparableString>>&)>& lambda) const
+{
+  if(dataset.empty())
+  {
+    _SelectAll(lambda);
+    return;
+  }
+
+  if(!_IsValidDataSetRequested(dataset))
+    throw std::runtime_error("One or more of requested columns are not present in schema");
+  
+  std::map<std::string,std::vector<database::ComparableString>> result;
+  std::for_each(dataset.begin(),dataset.end(),[&](auto column_name) {
+    auto column_index = std::distance(m_schema.begin(),m_schema.find(column_name));
+    result[column_name] = m_data -> operator[](column_index);
+  });
+  lambda(result);
+}
+
 void _for_each_criteria(const std::map<std::string,std::vector<database::ComparableString>>& filter_criteria,const std::map<std::string,std::vector<database::ComparisonType>>& filter_comparison_params,const std::function<void(const std::pair<std::string,std::vector<database::ComparableString>>&,const std::pair<std::string,std::vector<database::ComparisonType>>&)>& lambda)
 {
   if(filter_criteria.size() != filter_comparison_params.size())
     throw std::runtime_error("Iteration over unequal number of filtering criteria and comparison parameters is not defined");
-  
+
   auto criteria_iterator = filter_criteria.begin();
   auto comparison_params_iterator = filter_comparison_params.begin();
 
@@ -113,7 +136,7 @@ void _for_each_comparison(const std::vector<database::ComparableString>& values,
 void database::Container::_SelectRawWithCriteria(const std::map<std::string,std::vector<database::ComparableString>>& filter_criteria,const std::map<std::string,std::vector<database::ComparisonType>>& filter_comparison_params,const std::vector<std::string>& dataset,const std::function<void(const std::map<std::string,std::vector<database::ComparableString>>&)>& lambda) const
 {
   /*Check validity of the provided key-value criteria against defined schema*/
-  if(!database::Container::_IsValidFilterCriteriaForRawSelection(filter_criteria)) 
+  if(!database::Container::_IsValidFilterCriteriaForRawSelection(filter_criteria))
     throw std::runtime_error("Select attempted with invalid column identifiers");
 
   /*
@@ -127,16 +150,16 @@ void database::Container::_SelectRawWithCriteria(const std::map<std::string,std:
   /*Check if the requested dataset is valid*/
   if(!_IsValidDataSetRequested(dataset))
     throw std::runtime_error("One or more of requested columns are not present in schema");
-  
+
   // Will have the final filtered indices for the values that match the criteria.
-  std::vector<std::size_t> index_buffer; 
+  std::vector<std::size_t> index_buffer;
 
   //Iterating over each key-value pair in the filter_criteria and filter_comparison_type
   _for_each_criteria(filter_criteria,filter_comparison_params,[&](auto criteria_pair,auto comparison_pair){
 
     //This is the index of the column on which filtering must be applied
     std::size_t filter_column_index = std::distance(m_schema.begin(),m_schema.find(criteria_pair.first));
-    
+
     //Iterating over each pair of corresponding value respective compare_type provided in the given criteria
     _for_each_comparison(criteria_pair.second,comparison_pair.second,[&](auto value,auto compare) {
 
@@ -161,7 +184,7 @@ void database::Container::_SelectRawWithCriteria(const std::map<std::string,std:
   std::map<std::string,std::vector<database::ComparableString>> result; //Extract data with the filtered indices
 
   std::vector<std::string> required_columns;
-  if(dataset.empty()) 
+  if(dataset.empty())
     std::transform(m_schema.begin(),m_schema.end(),std::back_inserter(required_columns),[&](auto pair){ return pair.first; });
   else
     required_columns = dataset;
@@ -171,7 +194,7 @@ void database::Container::_SelectRawWithCriteria(const std::map<std::string,std:
     auto column = m_data -> operator[](column_index);
 
     std::vector<database::ComparableString> data_buffer;
-    std::transform(index_buffer.begin(),index_buffer.end(),std::back_inserter(data_buffer),[&](auto index) { 
+    std::transform(index_buffer.begin(),index_buffer.end(),std::back_inserter(data_buffer),[&](auto index) {
       return column[index];
     });
     result[column_name] = data_buffer;
@@ -179,6 +202,69 @@ void database::Container::_SelectRawWithCriteria(const std::map<std::string,std:
   lambda(result);
 }
 
+void database::Container::_UpdateValueForIndex(const std::size_t& index,const std::map<std::string,database::ComparableString>& new_value)
+{
+  if(new_value.empty()) return;
+  for(auto pair: new_value)
+  {
+    std::size_t column_index = std::distance(m_schema.begin(),m_schema.find(pair.first));
+    auto column_vector = m_data -> operator[](column_index);
+    column_vector[index] = pair.second;
+  }
+}
 
+void database::Container::_Update(const std::map<std::string,std::vector<database::ComparableString>>& filter_criteria,const std::map<std::string,std::vector<database::ComparisonType>>& filter_comparison_params,const std::map<std::string,database::ComparableString>& new_value)
+{
+  /*Check if criteria is provided for the update at all*/
+  if(filter_criteria.empty() || filter_comparison_params.empty())
+    throw std::runtime_error("Update attempted with inappropriate criteria");
 
+  /*Check validity of the provided key-value criteria against defined schema*/
+  if(!database::Container::_IsValidFilterCriteriaForRawSelection(filter_criteria))
+    throw std::runtime_error("Update attempted with invalid column identifiers");
 
+  /*
+  filter_criteria gives a column name as a key and the corresponding values on which basis data must be filtered.
+  filter_comparison_params is a similar that gives what kind of comparison it should be e.g.,==,!=,<,<=,>,>= etc..
+  Therefore filter_criteria and filter_comparison_types must be compatible to each other
+  */
+  if(!_IsValidFilteringInformation(filter_criteria,filter_comparison_params))
+    throw std::runtime_error("Criteria and parameters for filtering are not compatible");
+
+  //Iterating over each key-value pair in the filter_criteria and filter_comparison_type
+  _for_each_criteria(filter_criteria,filter_comparison_params,[&](auto criteria_pair,auto comparison_pair){
+
+    //This is the index of the column on which filtering must be applied
+    std::size_t filter_column_index = std::distance(m_schema.begin(),m_schema.find(criteria_pair.first));
+
+    //Iterating over each pair of corresponding value respective compare_type provided in the given criteria
+    _for_each_comparison(criteria_pair.second,comparison_pair.second,[&](auto value,auto compare) {
+
+      auto column = m_data -> operator[](filter_column_index);
+
+      //Iterating over each value in the given column to check if the filter criterion is satisfied O(n^3)
+      for(std::size_t i = 0; i < column.size(); i += 1)
+      {
+        switch (compare)
+        {
+          case equal_to: if(column[i] == value) _UpdateValueForIndex(i,new_value); break;
+          case not_eqaul_to: if(column[i] != value) _UpdateValueForIndex(i,new_value); break;
+          case greater_or_equal_to: if(column[i] >= value) _UpdateValueForIndex(i,new_value); break;
+          case lesser_or_equal_to: if(column[i] <= value) _UpdateValueForIndex(i,new_value); break;
+          case greater_than: if(column[i] > value) _UpdateValueForIndex(i,new_value); break;
+          case lesser_than: if(column[i] < value) _UpdateValueForIndex(i,new_value); break;
+        }
+      }
+    });
+  });
+}
+
+void database::Container::_DeleteFrom(const std::map<std::string,std::vector<database::ComparableString>>& filter_criteria,const std::map<std::string,std::vector<database::ComparisonType>>& filter_comparison_params)
+{
+  //TODO
+}
+
+void database::Container::_Truncate()
+{
+  //TODO
+}

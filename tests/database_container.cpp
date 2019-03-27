@@ -1,6 +1,7 @@
 #include "gtest/gtest.h"
 #include "TransactionFactory.hpp"
 #include "Utility.hpp"
+#include "Date.hpp"
 
 TEST(ContainerTests,canInitializeContainer)
 {
@@ -50,7 +51,7 @@ TEST(ContainerTests, canStoreAndRetrieveAllData)
   });
 }
 
-TEST(ContainerTests,canStoreAndRetrieveAllDataBasedOnSingleCriterion)
+TEST(ContainerTests,canStoreAndRetrieveDataBasedOnSingleCriterion)
 {
   std::map<std::string,database::DataType> schema = {
     {"p_id",database::DataType::non_quantifiable},
@@ -141,4 +142,79 @@ TEST(ContainerTests,canStoreAndRetrieveAllDataBasedOnSingleCriterion)
     std::cout << "Obtained result: " << "\n" << query_result << "\n";
     ASSERT_TRUE(query_result == expected_result3);
   });
+
+  std::map<std::string,std::vector<database::ComparableString>> expected_result4 = {
+    {"p_name",{(std::string)"John",(std::string)"Tim",(std::string)"Ulrike",(std::string)"Heinrich",(std::string)"Dominik",(std::string)"Mathias",(std::string)"Steve",(std::string)"Mark",(std::string)"Sam"}},
+    {"p_country",{(std::string)"US",(std::string)"US",(std::string)"DE",(std::string)"DE",(std::string)"DE",(std::string)"DE",(std::string)"NZ",(std::string)"AU",(std::string)"NZ"}}
+  };
+  database::TransactionFactory::SelectDataSetFrom(container,{"p_name","p_country"},[&](auto query_result) {
+    std::cout << "Obtained result: " << "\n" << query_result << "\n";
+    ASSERT_TRUE(query_result == expected_result4);
+  });
 }
+
+// TEST(ContainerTests,canUpdateDataBasedOnSingleCriterion)
+// {
+//   std::map<std::string,database::DataType> schema = {
+//     {"emp_id",database::DataType::non_quantifiable},
+//     {"emp_name",database::DataType::non_quantifiable},
+//     {"emp_status",database::DataType::non_quantifiable},
+//     {"emp_start_date",database::DataType::non_quantifiable}
+//   };
+//   database::Container container = database::TransactionFactory::ContainerWith_Name_Schema("Employee",schema);
+//   std::map<std::string,database::ComparableString> value1 = {
+//     {"emp_id",(std::string)"emp1"},
+//     {"emp_name",(std::string)"John"},
+//     {"emp_status",(std::string)"PARTTIME"},
+//     {"emp_start_date",database::Date::With_ddmmyyyy((std::string)"01012018").string_value()}
+//   };
+//   std::map<std::string,database::ComparableString> value2 = {
+//     {"emp_id",(std::string)"emp2"},
+//     {"emp_name",(std::string)"James"},
+//     {"emp_status",(std::string)"PARTTIME"},
+//     {"emp_start_date",database::Date::With_ddmmyyyy((std::string)"01022018").string_value()}
+//   };
+//   std::map<std::string,database::ComparableString> value3 = {
+//     {"emp_id",(std::string)"emp3"},
+//     {"emp_name",(std::string)"Tim"},
+//     {"emp_status",(std::string)"PARTTIME"},
+//     {"emp_start_date",database::Date::With_ddmmyyyy((std::string)"01032018").string_value()}
+//   };
+//   std::map<std::string,database::ComparableString> value4 = {
+//     {"emp_id",(std::string)"emp4"},
+//     {"emp_name",(std::string)"Ulrike"},
+//     {"emp_status",(std::string)"PARTTIME"},
+//     {"emp_start_date",database::Date::With_ddmmyyyy((std::string)"01042018").string_value()}
+//   };
+//   std::map<std::string,database::ComparableString> value5 = {
+//     {"emp_id",(std::string)"emp5"},
+//     {"emp_name",(std::string)"Markus"},
+//     {"emp_status",(std::string)"PARTTIME"},
+//     {"emp_start_date",database::Date::With_ddmmyyyy((std::string)"01052018").string_value()}
+//   };
+//   std::map<std::string,database::ComparableString> value6 = {
+//     {"emp_id",(std::string)"emp6"},
+//     {"emp_name",(std::string)"Udo"},
+//     {"emp_status",(std::string)"PARTTIME"},
+//     {"emp_start_date",database::Date::With_ddmmyyyy((std::string)"01062018").string_value()}
+//   };
+//   database::TransactionFactory::InsertInto(container,value1);
+//   database::TransactionFactory::InsertInto(container,value2);
+//   database::TransactionFactory::InsertInto(container,value3);
+//   database::TransactionFactory::InsertInto(container,value4);
+//   database::TransactionFactory::InsertInto(container,value5);
+//   database::TransactionFactory::InsertInto(container,value6);
+//   database::TransactionFactory::Update(container,
+//     {{"emp_start_date",{database::Date::With_ddmmyyyy((std::string)"01042018").string_value()}}},
+//     {{"emp_start_date",{database::ComparisonType::lesser_or_equal_to}}},
+//     {{"emp_status",(std::string)"FULLTIME"}}
+//   );
+//   std::map<std::string,std::vector<database::ComparableString>> expected_result1 = {
+//     {"emp_id",{(std::string)"emp1",(std::string)"emp2",(std::string)"emp3",(std::string)"emp4",(std::string)"emp5",(std::string)"emp6"}},
+//     {"emp_name",{(std::string)"John",(std::string)"James",(std::string)"Tim",(std::string)"Ulrike",(std::string)"Markus",(std::string)"Udo"}},
+//     {"emp_status",{(std::string)"FULLTIME",(std::string)"FULLTIME",(std::string)"FULLTIME",(std::string)"FULLTIME",(std::string)"PARTTIME",(std::string)"PARTTIME"}}
+//   };
+//   database::TransactionFactory::SelectRawWithCriteriaFrom(container,
+//
+//   );
+// }

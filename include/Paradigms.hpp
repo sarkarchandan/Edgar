@@ -5,13 +5,16 @@ namespace database
 {
   enum TransactionType 
   { 
-    create,
-    insert_,
+    create_database,
+    create_container,
+    insert_into,
     select,
     update,
     truncate,
     alter,
-    delete_
+    delete_from,
+    drop_container,
+    drop_database
   };
   enum ComparisonType
   {

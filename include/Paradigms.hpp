@@ -3,6 +3,16 @@
 
 namespace database
 {
+  enum TransactionType 
+  { 
+    create,
+    insert_,
+    select,
+    update,
+    truncate,
+    alter,
+    delete_
+  };
   enum ComparisonType
   {
     equal_to,

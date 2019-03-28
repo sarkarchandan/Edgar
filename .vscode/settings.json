@@ -67,5 +67,6 @@
     "ratio": "cpp",
     "set": "cpp",
     "string": "cpp"
-  }
+  },
+  "C_Cpp.configurationWarnings": "Disabled"
 }

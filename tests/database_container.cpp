@@ -166,38 +166,37 @@ TEST(ContainerTests,canUpdateDataBasedOnSingleCriterion)
     {"emp_id",(std::string)"emp1"},
     {"emp_name",(std::string)"John"},
     {"emp_status",(std::string)"PARTTIME"},
-    {"emp_start_date",(std::string)"20180101"}
+    {"emp_start_date",database::Date::With_ddmmyyyy(11012018).string_value()}
   };
   std::map<std::string,database::ComparableString> value2 = {
     {"emp_id",(std::string)"emp2"},
     {"emp_name",(std::string)"James"},
     {"emp_status",(std::string)"PARTTIME"},
-    {"emp_start_date",(std::string)"20180201"}
+    {"emp_start_date",database::Date::With_ddmmyyyy(11022018).string_value()}
   };
   std::map<std::string,database::ComparableString> value3 = {
     {"emp_id",(std::string)"emp3"},
     {"emp_name",(std::string)"Tim"},
     {"emp_status",(std::string)"PARTTIME"},
-    {"emp_start_date",(std::string)"20180301"}
+    {"emp_start_date",database::Date::With_ddmmyyyy(11032018).string_value()}
   };
   std::map<std::string,database::ComparableString> value4 = {
     {"emp_id",(std::string)"emp4"},
     {"emp_name",(std::string)"Ulrike"},
     {"emp_status",(std::string)"PARTTIME"},
-    {"emp_start_date",(std::string)"20180401"}
+    {"emp_start_date",database::Date::With_ddmmyyyy(11042018).string_value()}
   };
-  
   std::map<std::string,database::ComparableString> value5 = {
     {"emp_id",(std::string)"emp5"},
     {"emp_name",(std::string)"Markus"},
     {"emp_status",(std::string)"PARTTIME"},
-    {"emp_start_date",(std::string)"20180501"}
+    {"emp_start_date",database::Date::With_ddmmyyyy(11052018).string_value()}
   };
   std::map<std::string,database::ComparableString> value6 = {
     {"emp_id",(std::string)"emp6"},
     {"emp_name",(std::string)"Udo"},
     {"emp_status",(std::string)"PARTTIME"},
-    {"emp_start_date",(std::string)"20180601"}
+    {"emp_start_date",database::Date::With_ddmmyyyy(11062018).string_value()}
   };
   database::TransactionFactory::InsertInto(container,value1);
   database::TransactionFactory::InsertInto(container,value2);
@@ -206,7 +205,7 @@ TEST(ContainerTests,canUpdateDataBasedOnSingleCriterion)
   database::TransactionFactory::InsertInto(container,value5);
   database::TransactionFactory::InsertInto(container,value6);
   database::TransactionFactory::Update(container,
-    {{"emp_start_date",{(std::string)"20180401"}}},
+    {{"emp_start_date",{database::Date::With_ddmmyyyy(11042018).string_value()}}},
     {{"emp_start_date",{database::ComparisonType::lesser_or_equal_to}}},
     {{"emp_status",(std::string)"FULLTIME"}}
   );

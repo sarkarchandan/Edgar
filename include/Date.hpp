@@ -84,9 +84,7 @@ namespace database
     int32_t serialized_value() const { return m_serialized_value; }
     database::ComparableString string_value() const
     {
-      std::string string = "";
-      string += m_serialized_value;
-      database::ComparableString comparable_string = string;
+      database::ComparableString comparable_string = std::to_string(m_serialized_value);
       return comparable_string;
     }
     

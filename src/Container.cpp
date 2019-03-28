@@ -94,7 +94,7 @@ void database::Container::_SelectDataSet(const std::vector<std::string>& dataset
 
   if(!_IsValidDataSetRequested(dataset))
     throw std::runtime_error("One or more of requested columns are not present in schema");
-  
+
   std::map<std::string,std::vector<database::ComparableString>> result;
   std::for_each(dataset.begin(),dataset.end(),[&](auto column_name) {
     auto column_index = std::distance(m_schema.begin(),m_schema.find(column_name));
@@ -162,7 +162,6 @@ void database::Container::_SelectRawWithCriteria(const std::map<std::string,std:
 
     //Iterating over each pair of corresponding value respective compare_type provided in the given criteria
     _for_each_comparison(criteria_pair.second,comparison_pair.second,[&](auto value,auto compare) {
-
       auto column = m_data -> operator[](filter_column_index);
 
       //Iterating over each value in the given column to check if the filter criterion is satisfied O(n^3)
@@ -208,8 +207,7 @@ void database::Container::_UpdateValueForIndex(const std::size_t& index,const st
   for(auto pair: new_value)
   {
     std::size_t column_index = std::distance(m_schema.begin(),m_schema.find(pair.first));
-    auto column_vector = m_data -> operator[](column_index);
-    column_vector[index] = pair.second;
+    m_data -> operator[](column_index)[index] = pair.second;
   }
 }
 

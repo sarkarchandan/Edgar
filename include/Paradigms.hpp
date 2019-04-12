@@ -3,8 +3,8 @@
 
 namespace database
 {
-  enum TransactionType 
-  { 
+  enum TransactionType
+  {
     create_database,
     create_container,
     insert_into,

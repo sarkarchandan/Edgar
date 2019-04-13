@@ -25,6 +25,8 @@ namespace database
     std::map<std::string,std::string> m_insert_dataset;
     std::vector<std::string> m_select_dataset;
     std::map<std::string,std::string> m_select_conditions;
+    std::map<std::string,std::string> m_update_data;
+    std::map<std::string,std::string> m_update_conditions;
 
     #pragma mark Public initializers and accessors
     public:

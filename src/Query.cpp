@@ -108,7 +108,55 @@ void _Tran_SelectDataSet_Data_Filter(const std::string& expression,const std::fu
 void _Tran_SelectDataSet_Conditions_Filter(const std::string& expression,const std::function<void(const std::map<std::string,std::string>&)>& lambda)
 {
   //e.g. employee_id = 1
-  std::cout << "Condition: " << expression << "\n";
+  std::regex regex("([[:w:]]+) = ([[:w:]]+)",std::regex_constants::icase);
+  std::sregex_iterator pos = {expression.cbegin(),expression.cend(),regex};
+  std::sregex_iterator end;
+  std::map<std::string,std::string> conditions;
+  for(;pos != end; ++pos)
+    conditions[pos -> str(1)] = pos -> str(2);
+  lambda(conditions);
+}
+
+void _Tran_Update_Root_Filter(const std::string& expression,const std::function<void(const std::string& databaseName,const std::string& containerName, const std::string& remainder_part)>& lambda)
+{
+  //e.g. company.employee set employee_name = Tim,employee_status = fulltime where employee_id = 1
+  std::regex regex("([[:w:]]+).([[:w:]]+) set ",std::regex_constants::icase);
+  std::smatch smatch;
+  if(!std::regex_search(expression,smatch,regex))
+    throw std::runtime_error("Invalid regular expression provided for extracting transaction parameters");
+  std::string databaseName = smatch[1].str();
+  std::string containerName = smatch[2].str();
+  std::string remainder_part = smatch.suffix().str();
+  lambda(databaseName,containerName,remainder_part);
+}
+
+void _Tran_Update_Separator_Filter(const std::string& expression,const std::function<void(const std::string& newData, const std::string& conditions)>& lambda)
+{
+  //e.g. employee_name = Tim,employee_status = fulltime where employee_id = 1
+  std::regex regex(".where.",std::regex_constants::icase);
+  std::smatch smatch;
+  if(!std::regex_search(expression,smatch,regex))
+    throw std::runtime_error("Invalid regular expression provided for extracting transaction parameters");
+  std::string newData = smatch.prefix().str();
+  std::string conditions = smatch.suffix().str();
+  lambda(newData,conditions);
+}
+
+void _Tran_Update_Data_Filter(const std::string& expression,const std::function<void(const std::map<std::string,std::string>&)>& lambda)
+{
+  //e.g. employee_name = Tim,employee_status = fulltime
+  std::regex regex("([[:w:]]+) = ([[:w:]]+)",std::regex_constants::icase);
+  std::sregex_iterator pos = {expression.cbegin(),expression.cend(),regex};
+  std::sregex_iterator end;
+  std::map<std::string,std::string> newData;
+  for(;pos != end; ++pos)
+    newData[pos -> str(1)] = pos -> str(2);
+  lambda(newData);
+}
+
+void _Tran_Update_Conditions_Filter(const std::string& expression,const std::function<void(const std::map<std::string,std::string>&)>& lambda)
+{
+  //e.g. employee_id = 1
   std::regex regex("([[:w:]]+) = ([[:w:]]+)",std::regex_constants::icase);
   std::sregex_iterator pos = {expression.cbegin(),expression.cend(),regex};
   std::sregex_iterator end;
@@ -229,4 +277,31 @@ void database::Query::_ParseQueryString()
     });
     m_select_conditions = _m_select_conditions;
   }
+  else if(m_transaction_type == database::TransactionType::update)
+  {
+    std::string databaseName;
+    std::string containerName;
+    std::string remainder_part;
+    _Tran_Update_Root_Filter(first_order_filter_result.second,[&](auto _databaseName, auto _containerName, auto _remainder_part){
+      databaseName = _databaseName;
+      containerName = _containerName;
+      remainder_part = _remainder_part;
+    });
+    m_database_name = databaseName;
+    m_container_name = containerName;
+    
+    std::map<std::string,std::string> _m_update_data;
+    std::map<std::string,std::string> _m_update_conditions;
+    _Tran_Update_Separator_Filter(remainder_part,[&](auto newData, auto conditions){
+      _Tran_Update_Data_Filter(newData,[&](auto _new_data){
+        _m_update_data = _new_data;
+      });
+      _Tran_Update_Conditions_Filter(conditions,[&](auto _update_conditions){
+        _m_update_conditions = _update_conditions;
+      });
+    });
+    m_update_data = _m_update_data;
+    m_update_conditions = _m_update_conditions;
+  }
+  #pragma mark Continue Query parsing...
 }

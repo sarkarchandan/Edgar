@@ -79,3 +79,19 @@ TEST(QueryTests_SelectDataSet,canDetermineSpecificationForSelectDataSet)
   };
   ASSERT_TRUE(query_select_dataset.m_select_conditions == expected_conditions);
 }
+
+TEST(QueryTests_Update,canDetermineSpecificationForUpdate)
+{
+  database::Query query_update = "update company.employee set employee_name = Tim,employee_status = fulltime where employee_id = 1";
+  ASSERT_TRUE(query_update.m_database_name == "company");
+  ASSERT_TRUE(query_update.m_container_name == "employee");
+  std::map<std::string,std::string> update_data = {
+    {"employee_name","Tim"},
+    {"employee_status","fulltime"}
+  };
+  std::map<std::string,std::string> update_conditions = {
+    {"employee_id","1"}
+  };
+  ASSERT_TRUE(query_update.m_update_data == update_data);
+  ASSERT_TRUE(query_update.m_update_conditions == update_conditions);
+}

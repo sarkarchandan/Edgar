@@ -17,7 +17,7 @@ namespace database
     database::TransactionType m_transaction_type;
     std::string m_database_name;
     std::string m_container_name;
-    std::map<std::string,std::string> m_container_schema;
+    std::map<std::string,database::QueryDataType> m_container_schema;
     std::map<std::string,std::string> m_insert_dataset;
     std::vector<std::string> m_select_dataset;
     std::map<std::string,std::string> m_select_conditions;
@@ -29,7 +29,7 @@ namespace database
     database::TransactionType transactionType() const { return m_transaction_type; }
     std::string databaseName() const { return m_database_name; }
     std::string containerName() const { return m_container_name; }
-    std::map<std::string,std::string> containerSchema() const { return m_container_schema; }
+    std::map<std::string,database::QueryDataType> containerSchema() const { return m_container_schema; }
     std::map<std::string,std::string> insertDataset() const { return m_insert_dataset; }
     std::vector<std::string> selectDataset() const { return m_select_dataset; }
     std::map<std::string,std::string> selectConditions() const { return m_select_conditions; }

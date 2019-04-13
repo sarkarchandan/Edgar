@@ -24,7 +24,7 @@ void _Tran_CreateContainer_Root_Filter(const std::string& expression,const std::
   lambda(databaseName,containerName,schemaDetail);
 }
 
-void _Tran_CreateContainer_Schema_Filter(const std::string& expression,const std::function<void(const std::map<std::string,std::string>&)>& lambda)
+void _Tran_CreateContainer_Schema_Filter(const std::string& expression,const std::function<void(const std::map<std::string,database::QueryDataType>&)>& lambda)
 {
   //e.g. (employee_id int,employee_name string,employee_status string)
   std::regex regex("([[:w:]]+) ([[:w:]]+)",std::regex_constants::icase);
@@ -36,7 +36,15 @@ void _Tran_CreateContainer_Schema_Filter(const std::string& expression,const std
   std::map<std::string,std::string> containerSchema;
   for(;pos != end; ++pos)
     containerSchema[pos -> str(1)] = pos -> str(2);
-  lambda(containerSchema);
+
+  std::map<std::string,database::QueryDataType> refined_schema;
+  std::for_each(containerSchema.begin(),containerSchema.end(),[&](auto pair){
+    if(pair.second == "integer") refined_schema[pair.first] = database::QueryDataType::integer;
+    else if(pair.second == "string") refined_schema[pair.first] = database::QueryDataType::string;
+    else if(pair.second == "boolean") refined_schema[pair.first] = database::QueryDataType::boolean;
+    else throw std::runtime_error("Undefined datatypes is used for schema");
+  });
+  lambda(refined_schema);
 }
 
 void _Tran_InsertInto_Root_Filter(const std::string& expression,const std::function<void(const std::string& databaseName,const std::string& containerName, const std::string& dataset)>& lambda)
@@ -216,7 +224,7 @@ void database::Query::_ParseQueryString()
     });
     m_database_name = databaseName;
     m_container_name = containerName;
-    std::map<std::string,std::string> containerSchema;
+    std::map<std::string,database::QueryDataType> containerSchema;
     _Tran_CreateContainer_Schema_Filter(schemaDetail,[&](auto schema){
       containerSchema = schema;
     });
@@ -289,7 +297,7 @@ void database::Query::_ParseQueryString()
     });
     m_database_name = databaseName;
     m_container_name = containerName;
-    
+
     std::map<std::string,std::string> _m_update_data;
     std::map<std::string,std::string> _m_update_conditions;
     _Tran_Update_Separator_Filter(remainder_part,[&](auto newData, auto conditions){

@@ -26,13 +26,12 @@ namespace database
     private:
     Container(const std::string& name,const std::map<std::string,database::DataType>& schema)
     :m_name(name),m_schema(schema) { _PrepareContainer(); }
-    Container() = delete;
     #pragma mark Public deallocator,copy initializers and accessors
     public:
-    ~Container() {}
+    Container(){}
+    ~Container() { m_data.release(); }
     Container(const database::Container& container)
     {
-      std::cout << "Copy contructor called..." << "\n";
       this -> m_id = container.m_id;
       this -> m_name = container.m_name;
       this -> m_schema = container.m_schema;
@@ -48,6 +47,26 @@ namespace database
         this -> m_data -> emplace_back(buffer);
       });
     }
+
+    Container& operator =(const database::Container& container)
+    {
+      this -> m_id = container.m_id;
+      this -> m_name = container.m_name;
+      this -> m_schema = container.m_schema;
+
+      this -> m_data = std::make_unique<std::vector<std::vector<database::ComparableString>>>();
+      this -> m_data -> reserve(container.m_data -> size());
+      std::for_each(container.m_data -> begin(),container.m_data -> end(),[&](auto column){
+        std::vector<database::ComparableString> buffer;
+        buffer.reserve(column.size());
+        std::for_each(column.begin(),column.end(),[&](auto data) {
+          buffer.emplace_back(data);
+        });
+        this -> m_data -> emplace_back(buffer);
+      });
+      return *this;
+    }
+
     std::string name() const;
     std::size_t id() const;
     std::map<std::string,database::DataType> schema() const;

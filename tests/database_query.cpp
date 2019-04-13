@@ -4,7 +4,7 @@
 TEST(QueryTests,canDeriveTransactionType)
 {
   database::Query query_create_database = "create database company";
-  database::Query query_create_container = "create container company.employee(employee_id int,employee_name string,employee_status string)";
+  database::Query query_create_container = "create container company.employee(employee_id integer,employee_name string,employee_status string)";
   database::Query query_insert_into = "insert into company.employee values(employee_id:1,employee_name:chandan,employee_status:fulltime)";
   database::Query query_select_all = "select * from companye.employee";
   database::Query query_select_dataset = "select employee_id,employee_name from company.employee where employee_id = 1";
@@ -36,13 +36,13 @@ TEST(QueryTests_CreateDatabase,canDetermineSpecificationForCreateDatabase)
 
 TEST(QueryTests_CreateContainer,canDetermineSpecificationForCreateContainer)
 {
-  database::Query query_create_container = "create container company.employee(employee_id int,employee_name string,employee_status string)";
+  database::Query query_create_container = "create container company.employee(employee_id integer,employee_name string,employee_status string)";
   ASSERT_TRUE(query_create_container.databaseName() == "company");
   ASSERT_TRUE(query_create_container.containerName() == "employee");
-  std::map<std::string,std::string> expectedSchema = {
-    {"employee_id","int"},
-    {"employee_name","string"},
-    {"employee_status","string"}
+  std::map<std::string,database::QueryDataType> expectedSchema = {
+    {"employee_id",database::integer},
+    {"employee_name",database::string},
+    {"employee_status",database::string}
   };
   ASSERT_TRUE(query_create_container.containerSchema() == expectedSchema);
 }

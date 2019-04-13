@@ -41,6 +41,13 @@ namespace database
     order_by
   };
 
+  enum QueryDataType
+  {
+    integer,
+    string,
+    boolean
+  };
+
   enum DataType
   {
     quantifiable,

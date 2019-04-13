@@ -2,7 +2,7 @@
 #define QUERY_H
 #include <stdexcept>
 #include <vector>
-#include <unordered_map>
+#include <map>
 #include <regex>
 #include "ComparableString.hpp"
 #include "Paradigms.hpp"
@@ -21,6 +21,7 @@ namespace database
     database::TransactionType m_transaction_type;
     std::string m_database_name;
     std::string m_container_name;
+    std::map<std::string,std::string> m_container_schema;
 
     #pragma mark Public initializers and accessors
     public:

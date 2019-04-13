@@ -25,3 +25,22 @@ TEST(QueryTests,canDeriveTransactionType)
   ASSERT_TRUE(query_drop_container.m_transaction_type == database::TransactionType::drop_container);
   ASSERT_TRUE(query_drop_database.m_transaction_type == database::TransactionType::drop_database);
 }
+
+TEST(QueryTests_CreateDatabase,canDetermineDatabaseName)
+{
+  database::Query query_create_database = "create database company";
+  ASSERT_TRUE(query_create_database.m_database_name == "company");
+}
+
+TEST(QueryTests_CreateContainer,canDetermineContainerSpecification)
+{
+  database::Query query_create_container = "create container company.employee(employee_id int,employee_name string,employee_status string)";
+  ASSERT_TRUE(query_create_container.m_database_name == "company");
+  ASSERT_TRUE(query_create_container.m_container_name == "employee");
+  std::map<std::string,std::string> expectedSchema = {
+    {"employee_id","int"},
+    {"employee_name","string"},
+    {"employee_status","string"}
+  };
+  ASSERT_TRUE(query_create_container.m_container_schema == expectedSchema);
+}

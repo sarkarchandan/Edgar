@@ -67,12 +67,64 @@ void _Tran_InsertInto_Data_Filter(const std::string& expression,const std::funct
   lambda(containerSchema);
 }
 
+void _Tran_SelectAll_Root_Filter(const std::string& expression,const std::function<void(const std::string& databaseName,const std::string& containerName)>& lambda)
+{
+  //from companye.employee
+  std::regex regex("from ([[:w:]]+).([[:w:]]+)",std::regex_constants::icase);
+  std::smatch smatch;
+  if(!std::regex_search(expression,smatch,regex))
+    throw std::runtime_error("Invalid regular expression provided for extracting transaction parameters");
+  std::string databaseName = smatch[1].str();
+  std::string containerName = smatch[2].str();
+  lambda(databaseName,containerName);
+}
+
+void _Tran_SelectDataSet_Root_Filter(const std::string& expression,const std::function<void(const std::string& dataset,const std::string& databaseName,const std::string& containerName, const std::string& conditions)>& lambda)
+{
+  //employee_id,employee_name from company.employee where employee_id = 1
+  std::regex regex("from ([[:w:]]+).([[:w:]]+) where ",std::regex_constants::icase);
+  std::smatch smatch;
+  if(!std::regex_search(expression,smatch,regex))
+    throw std::runtime_error("Invalid regular expression provided for extracting transaction parameters");
+  std::string dataset = smatch.prefix().str();
+  std::string databaseName = smatch[1].str();
+  std::string containerName = smatch[2].str();
+  std::string conditions = smatch.suffix().str();
+  lambda(dataset,databaseName,containerName,conditions);
+}
+
+void _Tran_SelectDataSet_Data_Filter(const std::string& expression,const std::function<void(const std::vector<std::string>&)>& lambda)
+{
+  //e.g. employee_id,employee_name
+  std::regex regex("([[:w:]]+)",std::regex_constants::icase);
+  std::sregex_iterator pos = {expression.cbegin(),expression.cend(),regex};
+  std::sregex_iterator end;
+  std::vector<std::string> dataset;
+  for(;pos != end; ++pos)
+    dataset.emplace_back(pos -> str(1));
+  lambda(dataset);
+}
+
+void _Tran_SelectDataSet_Conditions_Filter(const std::string& expression,const std::function<void(const std::map<std::string,std::string>&)>& lambda)
+{
+  //e.g. employee_id = 1
+  std::cout << "Condition: " << expression << "\n";
+  std::regex regex("([[:w:]]+) = ([[:w:]]+)",std::regex_constants::icase);
+  std::sregex_iterator pos = {expression.cbegin(),expression.cend(),regex};
+  std::sregex_iterator end;
+  std::map<std::string,std::string> conditions;
+  for(;pos != end; ++pos)
+    conditions[pos -> str(1)] = pos -> str(2);
+  lambda(conditions);
+}
+
 std::pair<database::TransactionType,std::string> _Transaction_Filter(const std::string& expression)
 {
   std::regex tran_create_database("^CREATE DATABASE.",std::regex_constants::icase);
   std::regex tran_create_container("^CREATE CONTAINER.",std::regex_constants::icase);
   std::regex tran_insert_into("^INSERT INTO.",std::regex_constants::icase);
-  std::regex tran_select("^SELECT.",std::regex_constants::icase);
+  std::regex tran_select_all("^SELECT \\*.",std::regex_constants::icase);
+  std::regex tran_select_dataset("^SELECT.",std::regex_constants::icase);
   std::regex tran_update("^UPDATE.",std::regex_constants::icase);
   std::regex tran_truncate("^TRUNCATE CONTAINER.",std::regex_constants::icase);
   std::regex tran_alter("^ALTER CONTAINER.",std::regex_constants::icase);
@@ -83,7 +135,8 @@ std::pair<database::TransactionType,std::string> _Transaction_Filter(const std::
   if(std::regex_search(expression,tran_create_database)) return std::make_pair<database::TransactionType,std::string>(database::TransactionType::create_database,_Get_Transaction_Detail(expression,tran_create_database));
   else if(std::regex_search(expression,tran_create_container)) return std::make_pair<database::TransactionType,std::string>(database::TransactionType::create_container,_Get_Transaction_Detail(expression,tran_create_container));
   else if(std::regex_search(expression,tran_insert_into)) return std::make_pair<database::TransactionType,std::string>(database::TransactionType::insert_into,_Get_Transaction_Detail(expression,tran_insert_into));
-  else if(std::regex_search(expression,tran_select)) return std::make_pair<database::TransactionType,std::string>(database::TransactionType::select,_Get_Transaction_Detail(expression,tran_select));
+  else if(std::regex_search(expression,tran_select_all)) return std::make_pair<database::TransactionType,std::string>(database::TransactionType::select_all,_Get_Transaction_Detail(expression,tran_select_all));
+  else if(std::regex_search(expression,tran_select_dataset)) return std::make_pair<database::TransactionType,std::string>(database::TransactionType::select_dataset,_Get_Transaction_Detail(expression,tran_select_dataset));
   else if(std::regex_search(expression,tran_update)) return std::make_pair<database::TransactionType,std::string>(database::TransactionType::update,_Get_Transaction_Detail(expression,tran_update));
   else if(std::regex_search(expression,tran_truncate)) return std::make_pair<database::TransactionType,std::string>(database::TransactionType::truncate,_Get_Transaction_Detail(expression,tran_truncate));
   else if(std::regex_search(expression,tran_alter)) return std::make_pair<database::TransactionType,std::string>(database::TransactionType::alter,_Get_Transaction_Detail(expression,tran_alter));
@@ -91,7 +144,7 @@ std::pair<database::TransactionType,std::string> _Transaction_Filter(const std::
   else if(std::regex_search(expression,tran_drop_container)) return std::make_pair<database::TransactionType,std::string>(database::TransactionType::drop_container,_Get_Transaction_Detail(expression,tran_drop_container));
   else if(std::regex_search(expression,tran_drop_database)) return std::make_pair<database::TransactionType,std::string>(database::TransactionType::drop_database,_Get_Transaction_Detail(expression,tran_drop_database));
   else
-    throw std::runtime_error("Undefined transaction attempted");
+    throw std::runtime_error("Wrong syntax or undefined transaction attempted");
 }
 
 void database::Query::_ParseQueryString()
@@ -138,5 +191,42 @@ void database::Query::_ParseQueryString()
       insertDataSet = _dataset;
     });
     m_insert_dataset = insertDataSet;
+  }
+  else if(m_transaction_type == database::TransactionType::select_all)
+  {
+    std::string databaseName;
+    std::string containerName;
+    _Tran_SelectAll_Root_Filter(first_order_filter_result.second,[&](auto _databaseName, auto _containerName){
+      databaseName = _databaseName;
+      containerName = _containerName;
+    });
+    m_database_name = databaseName;
+    m_container_name = containerName;
+  }
+  else if(m_transaction_type == database::TransactionType::select_dataset)
+  {
+    std::string databaseName;
+    std::string containerName;
+    std::string dataset;
+    std::string conditions;
+    _Tran_SelectDataSet_Root_Filter(first_order_filter_result.second,[&](auto _dataset,auto _databaseName, auto _containerName, auto _conditions){
+      dataset = _dataset;
+      databaseName = _databaseName;
+      containerName = _containerName;
+      conditions = _conditions;
+    });
+    m_database_name = databaseName;
+    m_container_name = containerName;
+
+    std::vector<std::string> _m_dataset;
+    _Tran_SelectDataSet_Data_Filter(dataset,[&](auto _dataset) {
+      _m_dataset = _dataset;
+    });
+    m_select_dataset = _m_dataset;
+    std::map<std::string,std::string> _m_select_conditions;
+    _Tran_SelectDataSet_Conditions_Filter(conditions,[&](auto _conditions){
+      _m_select_conditions = _conditions;
+    });
+    m_select_conditions = _m_select_conditions;
   }
 }

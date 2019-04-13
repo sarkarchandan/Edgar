@@ -23,6 +23,8 @@ namespace database
     std::string m_container_name;
     std::map<std::string,std::string> m_container_schema;
     std::map<std::string,std::string> m_insert_dataset;
+    std::vector<std::string> m_select_dataset;
+    std::map<std::string,std::string> m_select_conditions;
 
     #pragma mark Public initializers and accessors
     public:

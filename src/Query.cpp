@@ -39,6 +39,34 @@ void _Tran_CreateContainer_Schema_Filter(const std::string& expression,const std
   lambda(containerSchema);
 }
 
+void _Tran_InsertInto_Root_Filter(const std::string& expression,const std::function<void(const std::string& databaseName,const std::string& containerName, const std::string& dataset)>& lambda)
+{
+  //company.employee values(employee_id:1,employee_name:chandan,employee_status:full_time)
+  std::regex regex("^([[:w:]]+).([[:w:]]+) values+",std::regex_constants::icase);
+  std::smatch smatch;
+  if(!std::regex_search(expression,smatch,regex))
+    throw std::runtime_error("Invalid regular expression provided for extracting transaction parameters");
+  std::string databaseName = smatch[1].str();
+  std::string containerName = smatch[2].str();
+  std::string dataset = smatch.suffix().str();
+  lambda(databaseName,containerName,dataset);
+}
+
+void _Tran_InsertInto_Data_Filter(const std::string& expression,const std::function<void(const std::map<std::string,std::string>&)>& lambda)
+{
+  //e.g. (employee_id:1,employee_name:chandan,employee_status:full_time)
+  std::regex regex("([[:w:]]+):([[:w:]]+)",std::regex_constants::icase);
+  std::smatch smatch;
+  if(!std::regex_search(expression,smatch,regex))
+    throw std::runtime_error("Invalid regular expression provided for extracting transaction parameters");
+  std::sregex_iterator pos = {expression.cbegin(),expression.cend(),regex};
+  std::sregex_iterator end;
+  std::map<std::string,std::string> containerSchema;
+  for(;pos != end; ++pos)
+    containerSchema[pos -> str(1)] = pos -> str(2);
+  lambda(containerSchema);
+}
+
 std::pair<database::TransactionType,std::string> _Transaction_Filter(const std::string& expression)
 {
   std::regex tran_create_database("^CREATE DATABASE.",std::regex_constants::icase);
@@ -70,7 +98,7 @@ void database::Query::_ParseQueryString()
 {
   std::pair<database::TransactionType,std::string> first_order_filter_result = _Transaction_Filter(m_query_string);
   m_transaction_type = first_order_filter_result.first;
-  
+
   //Create Database
   if(m_transaction_type == database::TransactionType::create_database)
     m_database_name = first_order_filter_result.second;
@@ -92,5 +120,23 @@ void database::Query::_ParseQueryString()
       containerSchema = schema;
     });
     m_container_schema = containerSchema;
+  }
+  else if(m_transaction_type == database::TransactionType::insert_into)
+  {
+    std::string databaseName;
+    std::string containerName;
+    std::string dataset;
+    _Tran_InsertInto_Root_Filter(first_order_filter_result.second,[&](auto _databaseName, auto _containerName, auto _dataset){
+      databaseName = _databaseName;
+      containerName = _containerName;
+      dataset = _dataset;
+    });
+    m_database_name = databaseName;
+    m_container_name = containerName;
+    std::map<std::string,std::string> insertDataSet;
+    _Tran_InsertInto_Data_Filter(dataset,[&](auto _dataset){
+      insertDataSet = _dataset;
+    });
+    m_insert_dataset = insertDataSet;
   }
 }

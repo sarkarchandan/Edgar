@@ -7,7 +7,6 @@
 #include "ComparableString.hpp"
 #include "Paradigms.hpp"
 
-
 namespace database
 {
   struct Query
@@ -15,9 +14,6 @@ namespace database
     #pragma mark Private member properties
     private:
     std::string m_query_string;
-
-    #pragma mark Public member properties
-    public:
     database::TransactionType m_transaction_type;
     std::string m_database_name;
     std::string m_container_name;
@@ -28,6 +24,18 @@ namespace database
     std::map<std::string,std::string> m_update_data;
     std::map<std::string,std::string> m_update_conditions;
 
+    #pragma mark Public accessors
+    public:
+    database::TransactionType transactionType() const { return m_transaction_type; }
+    std::string databaseName() const { return m_database_name; }
+    std::string containerName() const { return m_container_name; }
+    std::map<std::string,std::string> containerSchema() const { return m_container_schema; }
+    std::map<std::string,std::string> insertDataset() const { return m_insert_dataset; }
+    std::vector<std::string> selectDataset() const { return m_select_dataset; }
+    std::map<std::string,std::string> selectConditions() const { return m_select_conditions; }
+    std::map<std::string,std::string> updateDataset() const { return m_update_data; }
+    std::map<std::string,std::string> updateConditions() const { return m_update_conditions; }
+
     #pragma mark Public initializers and accessors
     public:
     Query(const char* query_string)
@@ -37,9 +45,6 @@ namespace database
     #pragma mark Private implementation layer
     private:
     void _ParseQueryString();
-
-    #pragma mark Public api layer
-    public:
   };
 }
 

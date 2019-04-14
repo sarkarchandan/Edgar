@@ -57,7 +57,7 @@ void database::DatabaseEngine::CreateContainer(const std::string& database_name,
   }
 }
 
-void database::DatabaseEngine::InsertIntoContainer(const std::string& database_name, const std::string& container_name, const std::map<std::string,std::string>& values,const std::function<void(bool)>& completion)
+void database::DatabaseEngine::InsertIntoContainer(const std::string& database_name, const std::string& container_name, const std::map<std::string,std::string>& values,const std::function<void(const std::map<std::string,std::vector<std::string>>&)>& result)
 {
   if(m_databases -> find(database_name) != m_databases -> end())
   {
@@ -67,11 +67,16 @@ void database::DatabaseEngine::InsertIntoContainer(const std::string& database_n
       std::map<std::string,database::ComparableString> comparable_keyvalues;
       std::for_each(values.begin(),values.end(),[&](auto pair){ comparable_keyvalues[pair.first] = pair.second; });
       database::TransactionFactory::InsertInto(database.m_containers -> operator[](container_name),comparable_keyvalues);
-      completion(true);
+      
+      std::map<std::string,std::vector<std::string>> query_result;
+      std::for_each(values.begin(),values.end(),[&](auto pair){
+        query_result[pair.first] = {pair.second};
+      });
+      result(query_result);
     }
-    else completion(false);
+    else result({});
   }
-  else completion(false);
+  else result({});
 }
 
 void database::DatabaseEngine::SelectAllFromContainer(const std::string& database_name,const std::string& container_name,const std::function<void(const std::map<std::string,std::vector<std::string>>&)>& result)
@@ -98,23 +103,58 @@ void database::DatabaseEngine::SelectAllFromContainer(const std::string& databas
   else result({});
 }
 
-// #pragma mark Implementation for data manipulation
-// void database::DatabaseEngine::ExecuteForDataDefintion(const database::Query& query,const std::function<void(bool)>& completion)
-// {
-//   switch (query.transactionType())
-//   {
-//     case database::create_database:
-//       break;
-//     case database::create_container:
-//       break;
-//     case database::
-  
-//     default:
-//       break;
-//   }
-// }
+#pragma mark Implementation for data manipulation
+void database::DatabaseEngine::ExecuteForDataDefintion(const database::Query& query,const std::function<void(bool)>& completion)
+{
+  if(query.transactionMetaType() != database::ddl)
+    throw std::runtime_error("Inappropriate query attempted. DDL queries expected");
+  switch (query.transactionType())
+  {
+    case database::create_database:
+      CreateDatabase(query.databaseName(),completion);
+      break;
+    case database::create_container:
+      CreateContainer(query.databaseName(),query.containerName(),query.containerSchema(),completion);
+      break;
+    case database::alter:
+      #pragma mark TODO
+      break;
+    case database::drop_container:
+      #pragma mark TODO
+      break;
+    case database::drop_database:
+      #pragma mark TODO
+      break;
+    default:
+      break;
+  }
+}
 
-// void database::DatabaseEngine::ExecuteForDataManipulation(const database::Query& query,const std::function<void(const std::map<std::string,std::vector<std::string>>&)>& result)
-// {
-
-// }
+void database::DatabaseEngine::ExecuteForDataManipulation(const database::Query& query,const std::function<void(const std::map<std::string,std::vector<std::string>>&)>& result)
+{
+  if(query.transactionMetaType() != database::dml)
+    throw std::runtime_error("Inappropriate query attempted. DML queries expected");
+  switch (query.transactionType())
+  {
+    case database::insert_into:
+      InsertIntoContainer(query.databaseName(),query.containerName(),query.insertDataset(),result);
+      break;
+    case database::select_all:
+      SelectAllFromContainer(query.databaseName(),query.containerName(),result);
+      break;
+    case database::select_dataset:
+      #pragma mark TODO
+      break;
+    case database::update:
+      #pragma mark TODO
+      break;
+    case database::truncate:
+      #pragma mark TODO
+      break;
+    case database::delete_from:
+      #pragma mark TODO
+      break;
+    default:
+      break;
+  }
+}

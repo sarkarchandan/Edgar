@@ -9,10 +9,16 @@ namespace database
   struct ComparableString
   {
     std::string m_string;
+    ComparableString():m_string(""){}
     ComparableString(const std::string& string)
     :m_string(string){}
     ~ComparableString(){}
-  
+    ComparableString(const database::ComparableString& string) { this -> m_string = string.m_string; }
+    ComparableString& operator =(const database::ComparableString& string) 
+    {
+      this -> m_string = string.m_string;
+      return *this;
+    }
     inline bool operator == (const database::ComparableString& string) const { return this -> m_string == string.m_string; }
     inline bool operator != (const database::ComparableString& string) const { return (!(*this == string)); }
     inline bool operator < (const database::ComparableString& string) const

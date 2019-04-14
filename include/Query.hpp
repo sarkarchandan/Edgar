@@ -14,6 +14,7 @@ namespace database
     #pragma mark Private member properties
     private:
     std::string m_query_string;
+    database::TransactionMetaType m_transaction_metatype;
     database::TransactionType m_transaction_type;
     std::string m_database_name;
     std::string m_container_name;
@@ -26,6 +27,7 @@ namespace database
 
     #pragma mark Public accessors
     public:
+    database::TransactionMetaType transactionMetaType() const { return m_transaction_metatype; }
     database::TransactionType transactionType() const { return m_transaction_type; }
     std::string databaseName() const { return m_database_name; }
     std::string containerName() const { return m_container_name; }

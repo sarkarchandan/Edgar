@@ -31,12 +31,14 @@ TEST(QueryTests,canDeriveTransactionType)
 TEST(QueryTests_CreateDatabase,canDetermineSpecificationForCreateDatabase)
 {
   database::Query query_create_database = "create database company";
+  ASSERT_TRUE(query_create_database.transactionMetaType() == database::ddl);
   ASSERT_TRUE(query_create_database.databaseName() == "company");
 }
 
 TEST(QueryTests_CreateContainer,canDetermineSpecificationForCreateContainer)
 {
   database::Query query_create_container = "create container company.employee(employee_id integer,employee_name string,employee_status string)";
+  ASSERT_TRUE(query_create_container.transactionMetaType() == database::ddl);
   ASSERT_TRUE(query_create_container.databaseName() == "company");
   ASSERT_TRUE(query_create_container.containerName() == "employee");
   std::map<std::string,database::QueryDataType> expectedSchema = {
@@ -50,6 +52,7 @@ TEST(QueryTests_CreateContainer,canDetermineSpecificationForCreateContainer)
 TEST(QueryTests_InsertInto,canDetermineSpecificationForInsertInto)
 {
   database::Query query_insert_into = "insert into company.employee values(employee_id:1,employee_name:chandan,employee_status:fulltime)";
+  ASSERT_TRUE(query_insert_into.transactionMetaType() == database::dml);
   ASSERT_TRUE(query_insert_into.databaseName() == "company");
   ASSERT_TRUE(query_insert_into.containerName() == "employee");
   std::map<std::string,std::string> expectedDataSet = {
@@ -63,6 +66,7 @@ TEST(QueryTests_InsertInto,canDetermineSpecificationForInsertInto)
 TEST(QueryTests_SelectAll,canDetermineSpecificationForSelectAll)
 {
   database::Query query_select_all = "select * from company.employee";
+  ASSERT_TRUE(query_select_all.transactionMetaType() == database::dml);
   ASSERT_TRUE(query_select_all.databaseName() == "company");
   ASSERT_TRUE(query_select_all.containerName() == "employee");
 }
@@ -70,6 +74,7 @@ TEST(QueryTests_SelectAll,canDetermineSpecificationForSelectAll)
 TEST(QueryTests_SelectDataSet,canDetermineSpecificationForSelectDataSet)
 {
   database::Query query_select_dataset = "select employee_id,employee_name from company.employee where employee_id = 1";
+  ASSERT_TRUE(query_select_dataset.transactionMetaType() == database::dml);
   ASSERT_TRUE(query_select_dataset.databaseName() == "company");
   ASSERT_TRUE(query_select_dataset.containerName() == "employee");
   std::vector<std::string> expected_dataset = {"employee_id","employee_name"};
@@ -83,6 +88,7 @@ TEST(QueryTests_SelectDataSet,canDetermineSpecificationForSelectDataSet)
 TEST(QueryTests_Update,canDetermineSpecificationForUpdate)
 {
   database::Query query_update = "update company.employee set employee_name = Tim,employee_status = fulltime where employee_id = 1";
+  ASSERT_TRUE(query_update.transactionMetaType() == database::dml);
   ASSERT_TRUE(query_update.databaseName() == "company");
   ASSERT_TRUE(query_update.containerName() == "employee");
   std::map<std::string,std::string> update_data = {

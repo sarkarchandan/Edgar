@@ -210,10 +210,14 @@ void database::Query::_ParseQueryString()
 
   //Create Database
   if(m_transaction_type == database::TransactionType::create_database)
+  {
+    m_transaction_metatype = database::ddl;
     m_database_name = first_order_filter_result.second;
+  }
   //Create Container
   else if(m_transaction_type == database::TransactionType::create_container)
   {
+    m_transaction_metatype = database::ddl;
     std::string databaseName;
     std::string containerName;
     std::string schemaDetail;
@@ -232,6 +236,7 @@ void database::Query::_ParseQueryString()
   }
   else if(m_transaction_type == database::TransactionType::insert_into)
   {
+    m_transaction_metatype = database::dml;
     std::string databaseName;
     std::string containerName;
     std::string dataset;
@@ -250,6 +255,7 @@ void database::Query::_ParseQueryString()
   }
   else if(m_transaction_type == database::TransactionType::select_all)
   {
+    m_transaction_metatype = database::dml;
     std::string databaseName;
     std::string containerName;
     _Tran_SelectAll_Root_Filter(first_order_filter_result.second,[&](auto _databaseName, auto _containerName){
@@ -261,6 +267,7 @@ void database::Query::_ParseQueryString()
   }
   else if(m_transaction_type == database::TransactionType::select_dataset)
   {
+    m_transaction_metatype = database::dml;
     std::string databaseName;
     std::string containerName;
     std::string dataset;
@@ -287,6 +294,7 @@ void database::Query::_ParseQueryString()
   }
   else if(m_transaction_type == database::TransactionType::update)
   {
+    m_transaction_metatype = database::dml;
     std::string databaseName;
     std::string containerName;
     std::string remainder_part;

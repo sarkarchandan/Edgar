@@ -3,19 +3,25 @@
 
 namespace database
 {
+  enum TransactionMetaType
+  {
+    ddl,
+    dml
+  };
+
   enum TransactionType
   {
-    create_database,
-    create_container,
-    insert_into,
-    select_all,
-    select_dataset,
-    update,
-    truncate,
-    alter,
-    delete_from,
-    drop_container,
-    drop_database
+    create_database,//ddl
+    create_container,//ddl
+    insert_into,//dml
+    select_all,//dml
+    select_dataset,//dml
+    update,//dml
+    truncate,//dml
+    alter,//ddl
+    delete_from,//dml
+    drop_container,//ddl
+    drop_database//ddl
   };
   enum ComparisonType
   {

@@ -4,9 +4,11 @@
 #pragma mark Implementation for data definition
 void database::DatabaseEngine::CreateDatabase(const std::string& database_name,const std::function<void(bool)>& completion)
 {
+  std::cout << "DB Creation Flag" << "\n";
   if(m_databases -> find(database_name) != m_databases -> end()) completion(false);
   else
   {
+    // std::cout << "DB Creation Flag" << "\n";
     database::Database database = database_name;
     m_databases -> operator[](database_name) = database;
     completion(true);
@@ -106,14 +108,17 @@ void database::DatabaseEngine::SelectAllFromContainer(const std::string& databas
 #pragma mark Implementation for data manipulation
 void database::DatabaseEngine::ExecuteForDataDefintion(const database::Query& query,const std::function<void(bool)>& completion)
 {
+  std::cout << "Executed for data definition" << "\n";
   if(query.transactionMetaType() != database::ddl)
     throw std::runtime_error("Inappropriate query attempted. DDL queries expected");
   switch (query.transactionType())
   {
     case database::create_database:
+      std::cout << "Query: create database" << "\n";
       CreateDatabase(query.databaseName(),completion);
       break;
     case database::create_container:
+      std::cout << "Query: create container" << "\n";
       CreateContainer(query.databaseName(),query.containerName(),query.containerSchema(),completion);
       break;
     case database::alter:
@@ -137,9 +142,11 @@ void database::DatabaseEngine::ExecuteForDataManipulation(const database::Query&
   switch (query.transactionType())
   {
     case database::insert_into:
+      std::cout << "Query: insert into" << "\n";
       InsertIntoContainer(query.databaseName(),query.containerName(),query.insertDataset(),result);
       break;
     case database::select_all:
+      std::cout << "Query: select all" << "\n";
       SelectAllFromContainer(query.databaseName(),query.containerName(),result);
       break;
     case database::select_dataset:

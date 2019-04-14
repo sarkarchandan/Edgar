@@ -24,10 +24,11 @@ if(NOT TARGET gtest OR NOT TARGET gtest_main OR NOT TARGET gmock OR NOT TARGET g
 endif()
 
 set(SOURCES
-    src/Container.cpp
-    src/TransactionFactory.cpp
     src/Query.cpp
-    src/DatabaseEngine.cpp)
+    src/DatabaseEngine.cpp
+    src/TransactionFactory.cpp
+    src/Container.cpp
+)
 
 add_library(Edgar SHARED ${SOURCES})
 target_include_directories(Edgar PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)

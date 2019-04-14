@@ -17,7 +17,7 @@ namespace database
     #pragma mark Private initializers and operators
     private:
     Database(const std::string name):m_database_name(name){}
-    
+
     public:
     Database(){}
     ~Database(){ m_containers.release(); }
@@ -25,6 +25,7 @@ namespace database
     {
       if(m_containers != nullptr) m_containers.release();
       this -> m_database_name = database.m_database_name;
+      m_containers = std::make_unique<std::unordered_map<std::string,database::Container>>();
       std::for_each(database.m_containers -> begin(), database.m_containers -> end(),[&](auto pair) {
         m_containers -> insert(pair);
       });
@@ -33,6 +34,7 @@ namespace database
     {
       if(m_containers != nullptr) m_containers.release();
       m_database_name = database.m_database_name;
+      m_containers = std::make_unique<std::unordered_map<std::string,database::Container>>();
       std::for_each(database.m_containers -> begin(),database.m_containers -> end(),[&](auto pair){
         m_containers -> insert(pair);
       });

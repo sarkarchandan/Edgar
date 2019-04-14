@@ -28,7 +28,13 @@ namespace database
     :m_name(name),m_schema(schema) { _PrepareContainer(); }
     #pragma mark Public deallocator,copy initializers and accessors
     public:
-    Container(){}
+    Container()
+    { 
+      m_id = 0;
+      m_name = "";
+      m_schema = {};
+      m_data = std::make_unique<std::vector<std::vector<database::ComparableString>>>();
+    }
     ~Container() { m_data.release(); }
     Container(const database::Container& container)
     {

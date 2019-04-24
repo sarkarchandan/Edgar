@@ -47,3 +47,8 @@ TEST(DatabaseEngineTests,canInsertDataIntoContainer)
     ASSERT_TRUE(query_result == expected_result);
   });
 }
+
+TEST(DatabaseEngineTests,canSelectAllDataFromContainer)
+{
+  
+}

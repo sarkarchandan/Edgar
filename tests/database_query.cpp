@@ -15,17 +15,38 @@ TEST(QueryTests,canDeriveTransactionType)
   database::Query query_drop_container = "drop container company.employee";
   database::Query query_drop_database = "drop database company";
 
-  ASSERT_TRUE(query_create_database.transactionType() == database::TransactionType::create_database);
-  ASSERT_TRUE(query_create_container.transactionType() == database::TransactionType::create_container);
-  ASSERT_TRUE(query_insert_into.transactionType() == database::TransactionType::insert_into);
-  ASSERT_TRUE(query_select_all.transactionType() == database::TransactionType::select_all);
-  ASSERT_TRUE(query_select_dataset.transactionType() == database::TransactionType::select_dataset);
-  ASSERT_TRUE(query_update.transactionType() == database::TransactionType::update);
-  ASSERT_TRUE(query_truncate.transactionType() == database::TransactionType::truncate);
-  ASSERT_TRUE(query_alter.transactionType() == database::TransactionType::alter);
-  ASSERT_TRUE(query_delete_from.transactionType() == database::TransactionType::delete_from);
-  ASSERT_TRUE(query_drop_container.transactionType() == database::TransactionType::drop_container);
-  ASSERT_TRUE(query_drop_database.transactionType() == database::TransactionType::drop_database);
+  ASSERT_TRUE(query_create_database.transactionType() == database::create_database);
+  ASSERT_TRUE(query_create_database.transactionMetaType() == database::ddl);
+
+  ASSERT_TRUE(query_create_container.transactionType() == database::create_container);
+  ASSERT_TRUE(query_create_container.transactionMetaType() == database::ddl);
+
+  ASSERT_TRUE(query_insert_into.transactionType() == database::insert_into);
+  ASSERT_TRUE(query_insert_into.transactionMetaType() == database::dml);
+
+  ASSERT_TRUE(query_select_all.transactionType() == database::select_all);
+  ASSERT_TRUE(query_select_all.transactionMetaType() == database::dml);
+
+  ASSERT_TRUE(query_select_dataset.transactionType() == database::select_dataset);
+  ASSERT_TRUE(query_select_dataset.transactionMetaType() == database::dml);
+
+  ASSERT_TRUE(query_update.transactionType() == database::update);
+  ASSERT_TRUE(query_update.transactionMetaType() == database::dml);
+
+  ASSERT_TRUE(query_truncate.transactionType() == database::truncate);
+  // ASSERT_TRUE(query_truncate.transactionMetaType() == database::dml);
+
+  ASSERT_TRUE(query_alter.transactionType() == database::alter);
+  // ASSERT_TRUE(query_alter.transactionMetaType() == database::ddl);
+
+  ASSERT_TRUE(query_delete_from.transactionType() == database::delete_from);
+  // ASSERT_TRUE(query_delete_from.transactionMetaType() == database::dml);
+
+  ASSERT_TRUE(query_drop_container.transactionType() == database::drop_container);
+  // ASSERT_TRUE(query_drop_container.transactionMetaType() == database::ddl);
+
+  ASSERT_TRUE(query_drop_database.transactionType() == database::drop_database);
+  // ASSERT_TRUE(query_drop_database.transactionMetaType() == database::ddl);
 }
 
 TEST(QueryTests_CreateDatabase,canDetermineSpecificationForCreateDatabase)

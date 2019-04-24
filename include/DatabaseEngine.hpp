@@ -10,29 +10,12 @@ namespace database
   {
     #pragma mark Private member properties
     private:
-    std::unique_ptr<std::unordered_map<std::string,database::Database>> m_databases;
+    std::unordered_map<std::string,database::Database> m_databases;
 
     #pragma mark Public initializers
     public:
-    DatabaseEngine(){ m_databases = std::make_unique<std::unordered_map<std::string,database::Database>>(); std::cout << "Engine Init" << "\n"; }
-    ~DatabaseEngine(){ m_databases.release(); std::cout << "Engine DeInit" << "\n"; }
-    DatabaseEngine(const DatabaseEngine& engine)
-    {
-      if(m_databases != nullptr) m_databases.release();
-      m_databases = std::make_unique<std::unordered_map<std::string,database::Database>>();
-      std::for_each(engine.m_databases -> begin(), engine.m_databases -> end(),[&](auto pair){
-        m_databases -> insert(pair);
-      });
-    }
-    DatabaseEngine& operator =(const DatabaseEngine& engine)
-    {
-      if(m_databases != nullptr) m_databases.release();
-      m_databases = std::make_unique<std::unordered_map<std::string,database::Database>>();
-      std::for_each(engine.m_databases -> begin(),engine.m_databases -> end(),[&](auto pair){
-        m_databases -> insert(pair);
-      });
-      return *this;
-    }
+    DatabaseEngine(){ }
+    ~DatabaseEngine(){}
 
     #pragma mark Private implementation layer
     private:

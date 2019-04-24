@@ -4,13 +4,11 @@
 #pragma mark Implementation for data definition
 void database::DatabaseEngine::CreateDatabase(const std::string& database_name,const std::function<void(bool)>& completion)
 {
-  std::cout << "DB Creation Flag" << "\n";
-  if(m_databases -> find(database_name) != m_databases -> end()) completion(false);
+  if(m_databases.find(database_name) != m_databases.end()) completion(false);
   else
   {
-    // std::cout << "DB Creation Flag" << "\n";
     database::Database database = database_name;
-    m_databases -> operator[](database_name) = database;
+    m_databases[database_name] = database;
     completion(true);
   }
 }
@@ -32,44 +30,44 @@ std::map<std::string,database::DataType> PrepareSchema(const std::map<std::strin
 
 void database::DatabaseEngine::CreateContainer(const std::string& database_name, const std::string& container_name, const std::map<std::string,database::QueryDataType>& container_schema,const std::function<void(bool)>& completion)
 {
-  if(m_databases -> find(database_name) != m_databases -> end())
+  if(m_databases.find(database_name) != m_databases.end())
   {
-    database::Database database = m_databases -> operator[](database_name);
-    if(database.m_containers -> find(container_name) != database.m_containers -> end()) completion(false);
+    database::Database database = m_databases[database_name];
+    if(database.m_containers.find(container_name) != database.m_containers.end()) completion(false);
     else
     {
       auto schema = PrepareSchema(container_schema);
       database::Container container = database::TransactionFactory::ContainerWith_Name_Schema(container_name,schema);
-      m_databases -> operator[](database_name).m_containers -> operator[](container_name) = container;
+      m_databases[database_name].m_containers[container_name] = container;
       completion(true);
     }
   }
-  else
-  {
-    CreateDatabase(database_name,[&](auto database_created){
-      if(database_created)
-      {
-        auto schema = PrepareSchema(container_schema);
-        database::Container container = database::TransactionFactory::ContainerWith_Name_Schema(container_name,schema);
-        m_databases -> operator[](database_name).m_containers -> operator[](container_name) = container;
-        completion(true);
-      }
-      else completion(false);
-    });
-  }
+  else completion(false);
+  // {
+  //   CreateDatabase(database_name,[&](auto database_created){
+  //     if(database_created)
+  //     {
+  //       auto schema = PrepareSchema(container_schema);
+  //       database::Container container = database::TransactionFactory::ContainerWith_Name_Schema(container_name,schema);
+  //       m_databases[database_name].m_containers[container_name] = container;
+  //       completion(true);
+  //     }
+  //     else completion(false);
+  //   });
+  // }
 }
 
 void database::DatabaseEngine::InsertIntoContainer(const std::string& database_name, const std::string& container_name, const std::map<std::string,std::string>& values,const std::function<void(const std::map<std::string,std::vector<std::string>>&)>& result)
 {
-  if(m_databases -> find(database_name) != m_databases -> end())
+  if(m_databases.find(database_name) != m_databases.end())
   {
-    database::Database database = m_databases -> operator[](database_name);
-    if(database.m_containers -> find(container_name) != database.m_containers -> end())
+    database::Database database = m_databases[database_name];
+    if(database.m_containers.find(container_name) != database.m_containers.end())
     {
       std::map<std::string,database::ComparableString> comparable_keyvalues;
       std::for_each(values.begin(),values.end(),[&](auto pair){ comparable_keyvalues[pair.first] = pair.second; });
-      database::TransactionFactory::InsertInto(database.m_containers -> operator[](container_name),comparable_keyvalues);
-      
+      database::TransactionFactory::InsertInto(database.m_containers[container_name],comparable_keyvalues);
+
       std::map<std::string,std::vector<std::string>> query_result;
       std::for_each(values.begin(),values.end(),[&](auto pair){
         query_result[pair.first] = {pair.second};
@@ -83,17 +81,17 @@ void database::DatabaseEngine::InsertIntoContainer(const std::string& database_n
 
 void database::DatabaseEngine::SelectAllFromContainer(const std::string& database_name,const std::string& container_name,const std::function<void(const std::map<std::string,std::vector<std::string>>&)>& result)
 {
-  if(m_databases -> find(database_name) != m_databases -> end())
+  if(m_databases.find(database_name) != m_databases.end())
   {
-    database::Database database = m_databases -> operator[](database_name);
-    if(database.m_containers -> find(container_name) != database.m_containers -> end())
+    database::Database database = m_databases[database_name];
+    if(database.m_containers.find(container_name) != database.m_containers.end())
     {
       std::map<std::string,std::vector<std::string>> query_result;
-      database::TransactionFactory::SelectAllFrom(database.m_containers -> operator[](container_name),[&](auto result){
+      database::TransactionFactory::SelectAllFrom(database.m_containers[container_name],[&](auto result){
         std::for_each(result.begin(),result.end(),[&](auto pair){
           std::vector<std::string>values;
-          std::transform(pair.second.begin(),pair.second.end(),std::back_inserter(values),[&](auto value){ 
-            return value.m_string; 
+          std::transform(pair.second.begin(),pair.second.end(),std::back_inserter(values),[&](auto value){
+            return value.m_string;
           });
           query_result[pair.first] = values;
         });
@@ -108,17 +106,14 @@ void database::DatabaseEngine::SelectAllFromContainer(const std::string& databas
 #pragma mark Implementation for data manipulation
 void database::DatabaseEngine::ExecuteForDataDefintion(const database::Query& query,const std::function<void(bool)>& completion)
 {
-  std::cout << "Executed for data definition" << "\n";
   if(query.transactionMetaType() != database::ddl)
     throw std::runtime_error("Inappropriate query attempted. DDL queries expected");
   switch (query.transactionType())
   {
     case database::create_database:
-      std::cout << "Query: create database" << "\n";
       CreateDatabase(query.databaseName(),completion);
       break;
     case database::create_container:
-      std::cout << "Query: create container" << "\n";
       CreateContainer(query.databaseName(),query.containerName(),query.containerSchema(),completion);
       break;
     case database::alter:
@@ -142,11 +137,9 @@ void database::DatabaseEngine::ExecuteForDataManipulation(const database::Query&
   switch (query.transactionType())
   {
     case database::insert_into:
-      std::cout << "Query: insert into" << "\n";
       InsertIntoContainer(query.databaseName(),query.containerName(),query.insertDataset(),result);
       break;
     case database::select_all:
-      std::cout << "Query: select all" << "\n";
       SelectAllFromContainer(query.databaseName(),query.containerName(),result);
       break;
     case database::select_dataset:

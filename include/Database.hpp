@@ -11,7 +11,7 @@ namespace database
     #pragma mark Private member types
     private:
     std::string m_database_name;
-    std::unique_ptr<std::unordered_map<std::string,database::Container>> m_containers;
+    std::unordered_map<std::string,database::Container> m_containers;
     friend class DatabaseEngine;
 
     #pragma mark Private initializers and operators
@@ -20,26 +20,7 @@ namespace database
 
     public:
     Database(){}
-    ~Database(){ m_containers.release(); }
-    Database(const database::Database& database)
-    {
-      if(m_containers != nullptr) m_containers.release();
-      this -> m_database_name = database.m_database_name;
-      m_containers = std::make_unique<std::unordered_map<std::string,database::Container>>();
-      std::for_each(database.m_containers -> begin(), database.m_containers -> end(),[&](auto pair) {
-        m_containers -> insert(pair);
-      });
-    }
-    Database& operator =(const Database& database)
-    {
-      if(m_containers != nullptr) m_containers.release();
-      m_database_name = database.m_database_name;
-      m_containers = std::make_unique<std::unordered_map<std::string,database::Container>>();
-      std::for_each(database.m_containers -> begin(),database.m_containers -> end(),[&](auto pair){
-        m_containers -> insert(pair);
-      });
-      return *this;
-    }
+    ~Database(){}
   };
 }
 

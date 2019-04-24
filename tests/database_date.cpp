@@ -112,13 +112,3 @@ TEST(DateTests,canCompareDates)
   ASSERT_FALSE(date13 < date14);
   ASSERT_TRUE(date13 >= date14);
 }
-
-TEST(DateTests,canConvertFromDateToComparableString)
-{
-  FAIL() << "Not Implemented";
-}
-
-TEST(DateTests,canConvertFromComparableStringToDate)
-{
-  FAIL() << "Not Implemented";
-}

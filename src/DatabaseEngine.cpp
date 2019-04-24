@@ -43,18 +43,6 @@ void database::DatabaseEngine::CreateContainer(const std::string& database_name,
     }
   }
   else completion(false);
-  // {
-  //   CreateDatabase(database_name,[&](auto database_created){
-  //     if(database_created)
-  //     {
-  //       auto schema = PrepareSchema(container_schema);
-  //       database::Container container = database::TransactionFactory::ContainerWith_Name_Schema(container_name,schema);
-  //       m_databases[database_name].m_containers[container_name] = container;
-  //       completion(true);
-  //     }
-  //     else completion(false);
-  //   });
-  // }
 }
 
 void database::DatabaseEngine::InsertIntoContainer(const std::string& database_name, const std::string& container_name, const std::map<std::string,std::string>& values,const std::function<void(const std::map<std::string,std::vector<std::string>>&)>& result)
@@ -104,7 +92,7 @@ void database::DatabaseEngine::SelectAllFromContainer(const std::string& databas
 }
 
 #pragma mark Implementation for data manipulation
-void database::DatabaseEngine::ExecuteForDataDefintion(const database::Query& query,const std::function<void(bool)>& completion)
+void database::DatabaseEngine::ExecuteForDataDefinition(const database::Query& query,const std::function<void(bool)>& completion)
 {
   if(query.transactionMetaType() != database::ddl)
     throw std::runtime_error("Inappropriate query attempted. DDL queries expected");

@@ -26,7 +26,7 @@ namespace database
 
     #pragma mark Public api layer
     public:
-    void ExecuteForDataDefintion(const database::Query& query,const std::function<void(bool)>& completion);
+    void ExecuteForDataDefinition(const database::Query& query,const std::function<void(bool)>& completion);
     void ExecuteForDataManipulation(const database::Query& query,const std::function<void(const std::map<std::string,std::vector<std::string>>&)>& result);
   };
 }

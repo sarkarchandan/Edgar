@@ -47,6 +47,8 @@ TEST(QueryTests,canDeriveTransactionType)
 
   ASSERT_TRUE(query_drop_database.transactionType() == database::drop_database);
   // ASSERT_TRUE(query_drop_database.transactionMetaType() == database::ddl);
+
+  FAIL() << "Implement rest of the query parsing methods" << "\n";
 }
 
 TEST(QueryTests_CreateDatabase,canDetermineSpecificationForCreateDatabase)

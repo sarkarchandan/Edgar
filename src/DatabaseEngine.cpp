@@ -32,8 +32,7 @@ void database::DatabaseEngine::CreateContainer(const std::string& database_name,
 {
   if(m_databases.find(database_name) != m_databases.end())
   {
-    database::Database database = m_databases[database_name];
-    if(database.m_containers.find(container_name) != database.m_containers.end()) completion(false);
+    if(m_databases[database_name].m_containers.find(container_name) != m_databases[database_name].m_containers.end()) completion(false);
     else
     {
       auto schema = PrepareSchema(container_schema);
@@ -49,12 +48,11 @@ void database::DatabaseEngine::InsertIntoContainer(const std::string& database_n
 {
   if(m_databases.find(database_name) != m_databases.end())
   {
-    database::Database database = m_databases[database_name];
-    if(database.m_containers.find(container_name) != database.m_containers.end())
+    if(m_databases[database_name].m_containers.find(container_name) != m_databases[database_name].m_containers.end())
     {
       std::map<std::string,database::ComparableString> comparable_keyvalues;
       std::for_each(values.begin(),values.end(),[&](auto pair){ comparable_keyvalues[pair.first] = pair.second; });
-      database::TransactionFactory::InsertInto(database.m_containers[container_name],comparable_keyvalues);
+      database::TransactionFactory::InsertInto(m_databases[database_name].m_containers[container_name],comparable_keyvalues);
 
       std::map<std::string,std::vector<std::string>> query_result;
       std::for_each(values.begin(),values.end(),[&](auto pair){
@@ -71,11 +69,11 @@ void database::DatabaseEngine::SelectAllFromContainer(const std::string& databas
 {
   if(m_databases.find(database_name) != m_databases.end())
   {
-    database::Database database = m_databases[database_name];
-    if(database.m_containers.find(container_name) != database.m_containers.end())
+    if(m_databases[database_name].m_containers.find(container_name) != m_databases[database_name].m_containers.end())
     {
       std::map<std::string,std::vector<std::string>> query_result;
-      database::TransactionFactory::SelectAllFrom(database.m_containers[container_name],[&](auto result){
+      database::TransactionFactory::SelectAllFrom(m_databases[database_name].m_containers[container_name],[&](auto result){
+      
         std::for_each(result.begin(),result.end(),[&](auto pair){
           std::vector<std::string>values;
           std::transform(pair.second.begin(),pair.second.end(),std::back_inserter(values),[&](auto value){

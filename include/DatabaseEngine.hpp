@@ -14,7 +14,7 @@ namespace database
 
     #pragma mark Public initializers
     public:
-    DatabaseEngine(){ }
+    DatabaseEngine(){}
     ~DatabaseEngine(){}
 
     #pragma mark Private implementation layer

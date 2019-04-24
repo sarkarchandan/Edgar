@@ -1,6 +1,5 @@
 #include "gtest/gtest.h"
 #include "TransactionFactory.hpp"
-#include "Utility.hpp"
 #include "Date.hpp"
 
 TEST(ContainerTests,canInitializeContainer)
@@ -114,7 +113,6 @@ TEST(ContainerTests,canStoreAndRetrieveDataBasedOnSingleCriterion)
     {{"p_country",{(std::string)"DE",(std::string)"NZ"}}},
     {{"p_country",{database::ComparisonType::equal_to,database::ComparisonType::equal_to}}},
     {},[&](auto query_result){
-    std::cout << "Obtained result: " << "\n" << query_result << "\n";
     ASSERT_TRUE(query_result == expected_result1);
   });
 
@@ -127,7 +125,6 @@ TEST(ContainerTests,canStoreAndRetrieveDataBasedOnSingleCriterion)
     {{"p_country",{(std::string)"DE"}}},
     {{"p_country",{database::ComparisonType::not_eqaul_to}}},
     {},[&](auto query_result) {
-    std::cout << "Obtained result: " << "\n" << query_result << "\n";
     ASSERT_TRUE(query_result == expected_result2);
   });
 
@@ -139,7 +136,6 @@ TEST(ContainerTests,canStoreAndRetrieveDataBasedOnSingleCriterion)
     {{"p_country",{(std::string)"US",(std::string)"AU"}}},
     {{"p_country",{database::ComparisonType::equal_to,database::ComparisonType::equal_to}}},
     {"p_id","p_name"},[&](auto query_result) {
-    std::cout << "Obtained result: " << "\n" << query_result << "\n";
     ASSERT_TRUE(query_result == expected_result3);
   });
 
@@ -148,7 +144,6 @@ TEST(ContainerTests,canStoreAndRetrieveDataBasedOnSingleCriterion)
     {"p_country",{(std::string)"US",(std::string)"US",(std::string)"DE",(std::string)"DE",(std::string)"DE",(std::string)"DE",(std::string)"NZ",(std::string)"AU",(std::string)"NZ"}}
   };
   database::TransactionFactory::SelectDataSetFrom(container,{"p_name","p_country"},[&](auto query_result) {
-    std::cout << "Obtained result: " << "\n" << query_result << "\n";
     ASSERT_TRUE(query_result == expected_result4);
   });
 }
@@ -214,7 +209,6 @@ TEST(ContainerTests,canUpdateDataBasedOnSingleCriterion)
     {"emp_status",{(std::string)"FULLTIME",(std::string)"FULLTIME",(std::string)"FULLTIME",(std::string)"FULLTIME",(std::string)"PARTTIME",(std::string)"PARTTIME"}}
   };
   database::TransactionFactory::SelectDataSetFrom(container,{"emp_name","emp_status"},[&](auto query_result){
-    std::cout << "Obtained result: " << "\n" << query_result << "\n";
     ASSERT_TRUE(query_result == expected_result1);
   });
 }

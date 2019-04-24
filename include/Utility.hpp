@@ -28,5 +28,12 @@ std::ostream& operator <<(std::ostream& stream, std::map<std::string,std::vector
   return stream;
 }
 
+std::ostream& operator <<(std::ostream& stream, std::map<std::string,std::vector<std::string>>& structure)
+{
+  std::for_each(structure.begin(),structure.end(),[&](auto pair){
+    stream << pair.first << "\t" << pair.second << "\n";
+  });
+  return stream;
+}
 
 #endif //UTILITY_H

@@ -6,7 +6,7 @@ TEST(QueryTests,canDeriveTransactionType)
   database::Query query_create_database = "create database company";
   database::Query query_create_container = "create container company.employee(employee_id integer,employee_name string,employee_status string)";
   database::Query query_insert_into = "insert into company.employee values(employee_id:1,employee_name:chandan,employee_status:fulltime)";
-  database::Query query_select_all = "select * from companye.employee";
+  database::Query query_select_all = "select * from company.employee";
   database::Query query_select_dataset = "select employee_id,employee_name from company.employee where employee_id = 1";
   database::Query query_update = "update company.employee set employee_status = fulltime where employee_id = 1";
   database::Query query_truncate = "truncate container company.employee";

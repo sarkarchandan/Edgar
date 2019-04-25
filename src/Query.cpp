@@ -87,18 +87,29 @@ void _Tran_SelectAll_Root_Filter(const std::string& expression,const std::functi
   lambda(databaseName,containerName);
 }
 
+
+
 void _Tran_SelectDataSet_Root_Filter(const std::string& expression,const std::function<void(const std::string& dataset,const std::string& databaseName,const std::string& containerName, const std::string& conditions)>& lambda)
 {
   //employee_id,employee_name from company.employee where employee_id = 1
-  std::regex regex("from ([[:w:]]+).([[:w:]]+) where ",std::regex_constants::icase);
+  std::regex regex_for_condition("from ([[:w:]]+).([[:w:]]+) where ",std::regex_constants::icase);
+  std::regex regex("from ([[:w:]]+).([[:w:]]+)",std::regex_constants::icase);
   std::smatch smatch;
-  if(!std::regex_search(expression,smatch,regex))
+  if(std::regex_search(expression,smatch,regex_for_condition))
+  {
+    std::string dataset = smatch.prefix().str();
+    std::string databaseName = smatch[1].str();
+    std::string containerName = smatch[2].str();
+    std::string conditions = smatch.suffix().str();
+    lambda(dataset,databaseName,containerName,conditions);
+  }else if(std::regex_search(expression,smatch,regex))
+  {
+    std::string dataset = smatch.prefix().str();
+    std::string databaseName = smatch[1].str();
+    std::string containerName = smatch[2].str();
+    lambda(dataset,databaseName,containerName,"");
+  }else
     throw std::runtime_error("Invalid regular expression provided for extracting transaction parameters");
-  std::string dataset = smatch.prefix().str();
-  std::string databaseName = smatch[1].str();
-  std::string containerName = smatch[2].str();
-  std::string conditions = smatch.suffix().str();
-  lambda(dataset,databaseName,containerName,conditions);
 }
 
 void _Tran_SelectDataSet_Data_Filter(const std::string& expression,const std::function<void(const std::vector<std::string>&)>& lambda)

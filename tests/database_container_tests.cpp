@@ -109,7 +109,7 @@ TEST(ContainerTests,canStoreAndRetrieveDataBasedOnSingleCriterion)
     {"p_id",{(std::string)"p3",(std::string)"p4",(std::string)"p5",(std::string)"p6",(std::string)"p7",(std::string)"p9"}},
     {"p_name",{(std::string)"Ulrike",(std::string)"Heinrich",(std::string)"Dominik",(std::string)"Mathias",(std::string)"Steve",(std::string)"Sam"}}
   };
-  database::TransactionFactory::SelectRawWithCriteriaFrom(container,
+  database::TransactionFactory::SelectRawDataSetWithCriteriaFrom(container,
     {{"p_country",{(std::string)"DE",(std::string)"NZ"}}},
     {{"p_country",{database::ComparisonType::equal_to,database::ComparisonType::equal_to}}},
     {},[&](auto query_result){
@@ -121,7 +121,7 @@ TEST(ContainerTests,canStoreAndRetrieveDataBasedOnSingleCriterion)
     {"p_id",{(std::string)"p1",(std::string)"p2",(std::string)"p7",(std::string)"p8",(std::string)"p9"}},
     {"p_name",{(std::string)"John",(std::string)"Tim",(std::string)"Steve",(std::string)"Mark",(std::string)"Sam"}}
   };
-  database::TransactionFactory::SelectRawWithCriteriaFrom(container,
+  database::TransactionFactory::SelectRawDataSetWithCriteriaFrom(container,
     {{"p_country",{(std::string)"DE"}}},
     {{"p_country",{database::ComparisonType::not_eqaul_to}}},
     {},[&](auto query_result) {
@@ -132,7 +132,7 @@ TEST(ContainerTests,canStoreAndRetrieveDataBasedOnSingleCriterion)
     {"p_id",{(std::string)"p1",(std::string)"p2",(std::string)"p8"}},
     {"p_name",{(std::string)"John",(std::string)"Tim",(std::string)"Mark"}}
   };
-  database::TransactionFactory::SelectRawWithCriteriaFrom(container,
+  database::TransactionFactory::SelectRawDataSetWithCriteriaFrom(container,
     {{"p_country",{(std::string)"US",(std::string)"AU"}}},
     {{"p_country",{database::ComparisonType::equal_to,database::ComparisonType::equal_to}}},
     {"p_id","p_name"},[&](auto query_result) {
@@ -143,7 +143,7 @@ TEST(ContainerTests,canStoreAndRetrieveDataBasedOnSingleCriterion)
     {"p_name",{(std::string)"John",(std::string)"Tim",(std::string)"Ulrike",(std::string)"Heinrich",(std::string)"Dominik",(std::string)"Mathias",(std::string)"Steve",(std::string)"Mark",(std::string)"Sam"}},
     {"p_country",{(std::string)"US",(std::string)"US",(std::string)"DE",(std::string)"DE",(std::string)"DE",(std::string)"DE",(std::string)"NZ",(std::string)"AU",(std::string)"NZ"}}
   };
-  database::TransactionFactory::SelectDataSetFrom(container,{"p_name","p_country"},[&](auto query_result) {
+  database::TransactionFactory::SelectRawDataSetFrom(container,{"p_name","p_country"},[&](auto query_result) {
     ASSERT_TRUE(query_result == expected_result4);
   });
 }
@@ -208,7 +208,7 @@ TEST(ContainerTests,canUpdateDataBasedOnSingleCriterion)
     {"emp_name",{(std::string)"John",(std::string)"James",(std::string)"Tim",(std::string)"Ulrike",(std::string)"Markus",(std::string)"Udo"}},
     {"emp_status",{(std::string)"FULLTIME",(std::string)"FULLTIME",(std::string)"FULLTIME",(std::string)"FULLTIME",(std::string)"PARTTIME",(std::string)"PARTTIME"}}
   };
-  database::TransactionFactory::SelectDataSetFrom(container,{"emp_name","emp_status"},[&](auto query_result){
+  database::TransactionFactory::SelectRawDataSetFrom(container,{"emp_name","emp_status"},[&](auto query_result){
     ASSERT_TRUE(query_result == expected_result1);
   });
 }

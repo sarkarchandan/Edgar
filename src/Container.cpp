@@ -84,7 +84,7 @@ void database::Container::_SelectAll(const std::function<void(const std::map<std
   lambda(result);
 }
 
-void database::Container::_SelectDataSet(const std::vector<std::string>& dataset,const std::function<void(const std::map<std::string,std::vector<database::ComparableString>>&)>& lambda) const
+void database::Container::_SelectRawDataSet(const std::vector<std::string>& dataset,const std::function<void(const std::map<std::string,std::vector<database::ComparableString>>&)>& lambda) const
 {
   if(dataset.empty())
   {
@@ -133,7 +133,7 @@ void _for_each_comparison(const std::vector<database::ComparableString>& values,
   }
 }
 
-void database::Container::_SelectRawWithCriteria(const std::map<std::string,std::vector<database::ComparableString>>& filter_criteria,const std::map<std::string,std::vector<database::ComparisonType>>& filter_comparison_params,const std::vector<std::string>& dataset,const std::function<void(const std::map<std::string,std::vector<database::ComparableString>>&)>& lambda) const
+void database::Container::_SelectRawDataSetWithCriteria(const std::map<std::string,std::vector<database::ComparableString>>& filter_criteria,const std::map<std::string,std::vector<database::ComparisonType>>& filter_comparison_params,const std::vector<std::string>& dataset,const std::function<void(const std::map<std::string,std::vector<database::ComparableString>>&)>& lambda) const
 {
   /*Check validity of the provided key-value criteria against defined schema*/
   if(!database::Container::_IsValidFilterCriteriaForRawSelection(filter_criteria))

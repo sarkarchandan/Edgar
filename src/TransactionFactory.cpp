@@ -16,14 +16,14 @@ void database::TransactionFactory::SelectAllFrom(const database::Container& cont
   container._SelectAll(lambda);
 }
 
-void database::TransactionFactory::SelectDataSetFrom(const database::Container& container, const std::vector<std::string>& dataset,const std::function<void(const std::map<std::string,std::vector<database::ComparableString>>&)>& lambda)
+void database::TransactionFactory::SelectRawDataSetFrom(const database::Container& container, const std::vector<std::string>& dataset,const std::function<void(const std::map<std::string,std::vector<database::ComparableString>>&)>& lambda)
 {
-  container._SelectDataSet(dataset,lambda);
+  container._SelectRawDataSet(dataset,lambda);
 }
 
-void database::TransactionFactory::SelectRawWithCriteriaFrom(const database::Container& container,const std::map<std::string,std::vector<database::ComparableString>>& filter_criteria,const std::map<std::string,std::vector<database::ComparisonType>>& filter_comparison_params,const std::vector<std::string>& dataset,const std::function<void(const std::map<std::string,std::vector<database::ComparableString>>&)>& lambda)
+void database::TransactionFactory::SelectRawDataSetWithCriteriaFrom(const database::Container& container,const std::map<std::string,std::vector<database::ComparableString>>& filter_criteria,const std::map<std::string,std::vector<database::ComparisonType>>& filter_comparison_params,const std::vector<std::string>& dataset,const std::function<void(const std::map<std::string,std::vector<database::ComparableString>>&)>& lambda)
 {
-  container._SelectRawWithCriteria(filter_criteria,filter_comparison_params,dataset,lambda);
+  container._SelectRawDataSetWithCriteria(filter_criteria,filter_comparison_params,dataset,lambda);
 }
 
 void database::TransactionFactory::Update(database::Container& container,const std::map<std::string,std::vector<database::ComparableString>>& filter_criteria,const std::map<std::string,std::vector<database::ComparisonType>>& filter_comparison_params,const std::map<std::string,database::ComparableString>& new_value)

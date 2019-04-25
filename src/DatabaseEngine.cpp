@@ -73,7 +73,6 @@ void database::DatabaseEngine::SelectAllFromContainer(const std::string& databas
     {
       std::map<std::string,std::vector<std::string>> query_result;
       database::TransactionFactory::SelectAllFrom(m_databases[database_name].m_containers[container_name],[&](auto result){
-
         std::for_each(result.begin(),result.end(),[&](auto pair){
           std::vector<std::string>values;
           std::transform(pair.second.begin(),pair.second.end(),std::back_inserter(values),[&](auto value){
@@ -88,6 +87,29 @@ void database::DatabaseEngine::SelectAllFromContainer(const std::string& databas
   }
   else result({});
 }
+
+// void database::DatabaseEngine::SelectDataSetFromContainer(const std::string& database_name,const std::string& container_name,const std::vector<std::string>& data_set,const std::function<void(const std::map<std::string,std::vector<std::string>>&)>& result)
+// {
+//   if(m_databases.find(database_name) != m_databases.end())
+//   {
+//     if(m_databases[database_name].m_containers.find(container_name) != m_databases[database_name].m_containers.end())
+//     {
+//       std::map<std::string,std::vector<std::string>> query_result;
+//       database::TransactionFactory::SelectDataSetFrom(m_databases[database_name].m_containers[container_name],data_set,[&](auto result){
+//         std::for_each(result.begin(),result.end(),[&](auto pair){
+//           std::vector<std::string>values;
+//           std::transform(pair.second.begin(),pair.second.end(),std::back_inserter(values),[&](auto value){
+//             return value.m_string;
+//           });
+//           query_result[pair.first] = values;
+//         });
+//       });
+//       result(query_result);
+//     }
+//     else result({});
+//   }
+//   else result({});
+// }
 
 #pragma mark Implementation for data manipulation
 void database::DatabaseEngine::ExecuteForDataDefinition(const database::Query& query,const std::function<void(bool)>& completion)

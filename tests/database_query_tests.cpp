@@ -7,7 +7,8 @@ TEST(QueryTests,canDeriveTransactionType)
   database::Query query_create_container = "create container company.employee(employee_id integer,employee_name string,employee_status string)";
   database::Query query_insert_into = "insert into company.employee values(employee_id:1,employee_name:chandan,employee_status:fulltime)";
   database::Query query_select_all = "select * from company.employee";
-  database::Query query_select_dataset = "select employee_id,employee_name from company.employee where employee_id = 1";
+  database::Query query_select_dataset = "select employee_id,employee_name from company.employee";
+  database::Query query_select_dataset_with_criteria = "select employee_id,employee_name from company.employee where employee_id = 1";
   database::Query query_update = "update company.employee set employee_status = fulltime where employee_id = 1";
   database::Query query_truncate = "truncate container company.employee";
   // database::Query query_alter = "alter container company.employee delete column employee_status";
@@ -29,6 +30,9 @@ TEST(QueryTests,canDeriveTransactionType)
 
   ASSERT_TRUE(query_select_dataset.transactionType() == database::select_dataset);
   ASSERT_TRUE(query_select_dataset.transactionMetaType() == database::dml);
+
+  ASSERT_TRUE(query_select_dataset_with_criteria.transactionType() == database::select_dataset);
+  ASSERT_TRUE(query_select_dataset_with_criteria.transactionMetaType() == database::dml);
 
   ASSERT_TRUE(query_update.transactionType() == database::update);
   ASSERT_TRUE(query_update.transactionMetaType() == database::dml);
@@ -94,16 +98,28 @@ TEST(QueryTests_SelectAll,canDetermineSpecificationForSelectAll)
 
 TEST(QueryTests_SelectDataSet,canDetermineSpecificationForSelectDataSet)
 {
-  database::Query query_select_dataset = "select employee_id,employee_name from company.employee where employee_id = 1";
+  database::Query query_select_dataset = "select employee_id,employee_name from company.employee";
   ASSERT_TRUE(query_select_dataset.transactionMetaType() == database::dml);
   ASSERT_TRUE(query_select_dataset.databaseName() == "company");
   ASSERT_TRUE(query_select_dataset.containerName() == "employee");
   std::vector<std::string> expected_dataset = {"employee_id","employee_name"};
   ASSERT_TRUE(query_select_dataset.selectDataset() == expected_dataset);
+  std::map<std::string,std::string> expected_conditions = {};
+  ASSERT_TRUE(query_select_dataset.selectConditions() == expected_conditions);
+}
+
+TEST(QueryTests_SelectDataSetWithCriteria,canDetermineSpecificationForSelectDataSetWithCriteria)
+{
+  database::Query query_select_dataset_with_criteria = "select employee_id,employee_name from company.employee where employee_id = 1";
+  ASSERT_TRUE(query_select_dataset_with_criteria.transactionMetaType() == database::dml);
+  ASSERT_TRUE(query_select_dataset_with_criteria.databaseName() == "company");
+  ASSERT_TRUE(query_select_dataset_with_criteria.containerName() == "employee");
+  std::vector<std::string> expected_dataset = {"employee_id","employee_name"};
+  ASSERT_TRUE(query_select_dataset_with_criteria.selectDataset() == expected_dataset);
   std::map<std::string,std::string> expected_conditions = {
     {"employee_id","1"}
   };
-  ASSERT_TRUE(query_select_dataset.selectConditions() == expected_conditions);
+  ASSERT_TRUE(query_select_dataset_with_criteria.selectConditions() == expected_conditions);
 }
 
 TEST(QueryTests_Update,canDetermineSpecificationForUpdate)

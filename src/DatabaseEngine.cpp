@@ -73,7 +73,7 @@ void database::DatabaseEngine::SelectAllFromContainer(const std::string& databas
     {
       std::map<std::string,std::vector<std::string>> query_result;
       database::TransactionFactory::SelectAllFrom(m_databases[database_name].m_containers[container_name],[&](auto result){
-      
+
         std::for_each(result.begin(),result.end(),[&](auto pair){
           std::vector<std::string>values;
           std::transform(pair.second.begin(),pair.second.end(),std::back_inserter(values),[&](auto value){
@@ -102,9 +102,9 @@ void database::DatabaseEngine::ExecuteForDataDefinition(const database::Query& q
     case database::create_container:
       CreateContainer(query.databaseName(),query.containerName(),query.containerSchema(),completion);
       break;
-    case database::alter:
-      #pragma mark TODO
-      break;
+    // case database::alter:
+    //   #pragma mark TODO
+    //   break;
     case database::drop_container:
       #pragma mark TODO
       break;

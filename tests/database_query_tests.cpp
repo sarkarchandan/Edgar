@@ -10,7 +10,7 @@ TEST(QueryTests,canDeriveTransactionType)
   database::Query query_select_dataset = "select employee_id,employee_name from company.employee where employee_id = 1";
   database::Query query_update = "update company.employee set employee_status = fulltime where employee_id = 1";
   database::Query query_truncate = "truncate container company.employee";
-  database::Query query_alter = "alter container company.employee delete column employee_status";
+  // database::Query query_alter = "alter container company.employee delete column employee_status";
   database::Query query_delete_from = "delete from company.employee where employee_id = 1";
   database::Query query_drop_container = "drop container company.employee";
   database::Query query_drop_database = "drop database company";
@@ -36,8 +36,8 @@ TEST(QueryTests,canDeriveTransactionType)
   ASSERT_TRUE(query_truncate.transactionType() == database::truncate);
   ASSERT_TRUE(query_truncate.transactionMetaType() == database::dml);
 
-  ASSERT_TRUE(query_alter.transactionType() == database::alter);
-  ASSERT_TRUE(query_alter.transactionMetaType() == database::ddl);
+  // ASSERT_TRUE(query_alter.transactionType() == database::alter);
+  // ASSERT_TRUE(query_alter.transactionMetaType() == database::ddl);
 
   ASSERT_TRUE(query_delete_from.transactionType() == database::delete_from);
   ASSERT_TRUE(query_delete_from.transactionMetaType() == database::dml);
@@ -121,4 +121,12 @@ TEST(QueryTests_Update,canDetermineSpecificationForUpdate)
   };
   ASSERT_TRUE(query_update.updateDataset() == update_data);
   ASSERT_TRUE(query_update.updateConditions() == update_conditions);
+}
+
+TEST(QueryTests_Truncate,canDetermineSpecificationForTruncate)
+{
+  database::Query query_truncate = "truncate container company.employee";
+  ASSERT_TRUE(query_truncate.transactionMetaType() == database::dml);
+  ASSERT_TRUE(query_truncate.databaseName() == "company");
+  ASSERT_TRUE(query_truncate.containerName() == "employee");
 }

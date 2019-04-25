@@ -174,6 +174,18 @@ void _Tran_Update_Conditions_Filter(const std::string& expression,const std::fun
   lambda(conditions);
 }
 
+void _Tran_Truncate_Root_Filter(const std::string& expression,const std::function<void(const std::string& databaseName,const std::string& containerName)>& lambda)
+{
+  //e.g. company.employee
+  std::regex regex("([[:w:]]+).([[:w:]]+)",std::regex_constants::icase);
+  std::smatch smatch;
+  if(!std::regex_search(expression,smatch,regex))
+    throw std::runtime_error("Invalid regular expression provided for extracting transaction parameters");
+  std::string databaseName = smatch[1].str();
+  std::string containerName = smatch[2].str();
+  lambda(databaseName,containerName);
+}
+
 std::pair<database::TransactionType,std::string> _Transaction_Filter(const std::string& expression)
 {
   std::regex tran_create_database("^CREATE DATABASE.",std::regex_constants::icase);
@@ -183,22 +195,22 @@ std::pair<database::TransactionType,std::string> _Transaction_Filter(const std::
   std::regex tran_select_dataset("^SELECT.",std::regex_constants::icase);
   std::regex tran_update("^UPDATE.",std::regex_constants::icase);
   std::regex tran_truncate("^TRUNCATE CONTAINER.",std::regex_constants::icase);
-  std::regex tran_alter("^ALTER CONTAINER.",std::regex_constants::icase);
+  // std::regex tran_alter("^ALTER CONTAINER.",std::regex_constants::icase);
   std::regex tran_delete("^DELETE FROM.",std::regex_constants::icase);
   std::regex tran_drop_container("^DROP CONTAINER.",std::regex_constants::icase);
   std::regex tran_drop_database("^DROP DATABASE.",std::regex_constants::icase);
 
-  if(std::regex_search(expression,tran_create_database)) return std::make_pair<database::TransactionType,std::string>(database::TransactionType::create_database,_Get_Transaction_Detail(expression,tran_create_database));
-  else if(std::regex_search(expression,tran_create_container)) return std::make_pair<database::TransactionType,std::string>(database::TransactionType::create_container,_Get_Transaction_Detail(expression,tran_create_container));
-  else if(std::regex_search(expression,tran_insert_into)) return std::make_pair<database::TransactionType,std::string>(database::TransactionType::insert_into,_Get_Transaction_Detail(expression,tran_insert_into));
-  else if(std::regex_search(expression,tran_select_all)) return std::make_pair<database::TransactionType,std::string>(database::TransactionType::select_all,_Get_Transaction_Detail(expression,tran_select_all));
-  else if(std::regex_search(expression,tran_select_dataset)) return std::make_pair<database::TransactionType,std::string>(database::TransactionType::select_dataset,_Get_Transaction_Detail(expression,tran_select_dataset));
-  else if(std::regex_search(expression,tran_update)) return std::make_pair<database::TransactionType,std::string>(database::TransactionType::update,_Get_Transaction_Detail(expression,tran_update));
-  else if(std::regex_search(expression,tran_truncate)) return std::make_pair<database::TransactionType,std::string>(database::TransactionType::truncate,_Get_Transaction_Detail(expression,tran_truncate));
-  else if(std::regex_search(expression,tran_alter)) return std::make_pair<database::TransactionType,std::string>(database::TransactionType::alter,_Get_Transaction_Detail(expression,tran_alter));
-  else if(std::regex_search(expression,tran_delete)) return std::make_pair<database::TransactionType,std::string>(database::TransactionType::delete_from,_Get_Transaction_Detail(expression,tran_delete));
-  else if(std::regex_search(expression,tran_drop_container)) return std::make_pair<database::TransactionType,std::string>(database::TransactionType::drop_container,_Get_Transaction_Detail(expression,tran_drop_container));
-  else if(std::regex_search(expression,tran_drop_database)) return std::make_pair<database::TransactionType,std::string>(database::TransactionType::drop_database,_Get_Transaction_Detail(expression,tran_drop_database));
+  if(std::regex_search(expression,tran_create_database)) return std::make_pair<database::TransactionType,std::string>(database::create_database,_Get_Transaction_Detail(expression,tran_create_database));
+  else if(std::regex_search(expression,tran_create_container)) return std::make_pair<database::TransactionType,std::string>(database::create_container,_Get_Transaction_Detail(expression,tran_create_container));
+  else if(std::regex_search(expression,tran_insert_into)) return std::make_pair<database::TransactionType,std::string>(database::insert_into,_Get_Transaction_Detail(expression,tran_insert_into));
+  else if(std::regex_search(expression,tran_select_all)) return std::make_pair<database::TransactionType,std::string>(database::select_all,_Get_Transaction_Detail(expression,tran_select_all));
+  else if(std::regex_search(expression,tran_select_dataset)) return std::make_pair<database::TransactionType,std::string>(database::select_dataset,_Get_Transaction_Detail(expression,tran_select_dataset));
+  else if(std::regex_search(expression,tran_update)) return std::make_pair<database::TransactionType,std::string>(database::update,_Get_Transaction_Detail(expression,tran_update));
+  else if(std::regex_search(expression,tran_truncate)) return std::make_pair<database::TransactionType,std::string>(database::truncate,_Get_Transaction_Detail(expression,tran_truncate));
+  // else if(std::regex_search(expression,tran_alter)) return std::make_pair<database::TransactionType,std::string>(database::alter,_Get_Transaction_Detail(expression,tran_alter));
+  else if(std::regex_search(expression,tran_delete)) return std::make_pair<database::TransactionType,std::string>(database::delete_from,_Get_Transaction_Detail(expression,tran_delete));
+  else if(std::regex_search(expression,tran_drop_container)) return std::make_pair<database::TransactionType,std::string>(database::drop_container,_Get_Transaction_Detail(expression,tran_drop_container));
+  else if(std::regex_search(expression,tran_drop_database)) return std::make_pair<database::TransactionType,std::string>(database::drop_database,_Get_Transaction_Detail(expression,tran_drop_database));
   else
     throw std::runtime_error("Wrong syntax or undefined transaction attempted");
 }
@@ -322,11 +334,20 @@ void database::Query::_ParseQueryString()
   else if(m_transaction_type == database::truncate)
   {
     m_transaction_metatype = database::dml;
+    std::string databaseName;
+    std::string containerName;
+    _Tran_Truncate_Root_Filter(first_order_filter_result.second,[&](auto _databaseName,auto _containerName){
+      databaseName = _databaseName;
+      containerName = _containerName;
+    });
+    m_database_name = databaseName;
+    m_container_name = containerName;
   }
-  else if(m_transaction_type == database::alter)
-  {
-    m_transaction_metatype = database::ddl;
-  }
+  // else if(m_transaction_type == database::alter)
+  // {
+  //   m_transaction_metatype = database::ddl;
+
+  // }
   else if(m_transaction_type == database::delete_from)
   {
     m_transaction_metatype = database::dml;

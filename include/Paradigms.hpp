@@ -18,11 +18,12 @@ namespace database
     select_dataset,//dml
     update,//dml
     truncate,//dml
-    alter,//ddl
+    // alter,//ddl
     delete_from,//dml
     drop_container,//ddl
     drop_database//ddl
   };
+
   enum ComparisonType
   {
     equal_to,

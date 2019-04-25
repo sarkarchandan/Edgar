@@ -78,7 +78,7 @@ TEST(DatabaseEngineTests,canSelectAllDataFromContainer)
       {"employee_name",{"Dominik_Oeh","Heinrich_Graser","Mathias_Renner","Marcus_Kalb"}},
       {"employee_status",{"fulltime","parttime","parttime","fulltime"}}
     };
-    std::cout << "Result Set: " << "\n" << query_result << "\n";
+    std::cout << "Result Set for all records: " << "\n" << query_result << "\n";
     ASSERT_TRUE(query_result == expected_result);
   });
 }
@@ -105,14 +105,13 @@ TEST(DatabaseEngineTests,canSelectDatasetFromContainer)
     database_engine.ExecuteForDataManipulation(query,[&](auto query_result) { /*pass*/ });
   });
 
-  database::Query query_select_all = "select * from company.employee";
-  database_engine.ExecuteForDataManipulation(query_select_all,[&](auto query_result) {
+  database::Query query_select_dataset = "select employee_id,employee_name from company.employee";
+  database_engine.ExecuteForDataManipulation(query_select_dataset,[&](auto query_result) {
     std::map<std::string,std::vector<std::string>> expected_result = {
       {"employee_id",{"1","2","3","4"}},
-      {"employee_name",{"Dominik_Oeh","Heinrich_Graser","Mathias_Renner","Marcus_Kalb"}},
-      {"employee_status",{"fulltime","parttime","parttime","fulltime"}}
+      {"employee_name",{"Dominik_Oeh","Heinrich_Graser","Mathias_Renner","Marcus_Kalb"}}
     };
-    std::cout << "Result Set: " << "\n" << query_result << "\n";
+    std::cout << "Result Set for selected dataset without criteria: " << "\n" << query_result << "\n";
     ASSERT_TRUE(query_result == expected_result);
   });
 }

@@ -1,6 +1,18 @@
 #include "DatabaseEngine.hpp"
 #include "TransactionFactory.hpp"
 
+#pragma mark Implementation layer convenient methods
+std::map<std::string,std::vector<database::ComparableString>> _Transform(const std::map<std::string,std::vector<std::string>>& params)
+{
+  std::map<std::string,std::vector<database::ComparableString>> modified_params;
+  std::for_each(params.begin(),params.end(),[&](auto pair) {
+    std::vector<database::ComparableString> buffer;
+    std::transform(pair.second.begin(),pair.second.end(),std::back_inserter(buffer),[&](auto value) { return value; });
+    modified_params[pair.first] = buffer;
+  });
+  return modified_params;
+}
+
 #pragma mark Implementation for data definition
 void database::DatabaseEngine::CreateDatabase(const std::string& database_name,const std::function<void(bool)>& completion)
 {
@@ -88,28 +100,51 @@ void database::DatabaseEngine::SelectAllFromContainer(const std::string& databas
   else result({});
 }
 
-// void database::DatabaseEngine::SelectDataSetFromContainer(const std::string& database_name,const std::string& container_name,const std::vector<std::string>& data_set,const std::function<void(const std::map<std::string,std::vector<std::string>>&)>& result)
-// {
-//   if(m_databases.find(database_name) != m_databases.end())
-//   {
-//     if(m_databases[database_name].m_containers.find(container_name) != m_databases[database_name].m_containers.end())
-//     {
-//       std::map<std::string,std::vector<std::string>> query_result;
-//       database::TransactionFactory::SelectDataSetFrom(m_databases[database_name].m_containers[container_name],data_set,[&](auto result){
-//         std::for_each(result.begin(),result.end(),[&](auto pair){
-//           std::vector<std::string>values;
-//           std::transform(pair.second.begin(),pair.second.end(),std::back_inserter(values),[&](auto value){
-//             return value.m_string;
-//           });
-//           query_result[pair.first] = values;
-//         });
-//       });
-//       result(query_result);
-//     }
-//     else result({});
-//   }
-//   else result({});
-// }
+void database::DatabaseEngine::SelectRawDataSetFromContainer(const std::string& database_name,const std::string& container_name,const std::vector<std::string>& data_set,const std::function<void(const std::map<std::string,std::vector<std::string>>&)>& result)
+{
+  if(m_databases.find(database_name) != m_databases.end())
+  {
+    if(m_databases[database_name].m_containers.find(container_name) != m_databases[database_name].m_containers.end())
+    {
+      std::map<std::string,std::vector<std::string>> query_result;
+      database::TransactionFactory::SelectRawDataSetFrom(m_databases[database_name].m_containers[container_name],data_set,[&](auto result){
+        std::for_each(result.begin(),result.end(),[&](auto pair){
+          std::vector<std::string>values;
+          std::transform(pair.second.begin(),pair.second.end(),std::back_inserter(values),[&](auto value){
+            return value.m_string;
+          });
+          query_result[pair.first] = values;
+        });
+      });
+      result(query_result);
+    }
+    else result({});
+  }
+  else result({});
+}
+
+void database::DatabaseEngine::SelectRawDataSetFromContainerWithCriteria(const std::string& database_name,const std::string& container_name,const std::map<std::string,std::vector<std::string>>& filter_criteria,const std::map<std::string,std::vector<database::ComparisonType>>& filter_comparison_params,const std::vector<std::string>& data_set,const std::function<void(const std::map<std::string,std::vector<std::string>>&)>& result)
+{
+  if(m_databases.find(database_name) != m_databases.end())
+  {
+    if(m_databases[database_name].m_containers.find(container_name) != m_databases[database_name].m_containers.end())
+    {
+      std::map<std::string,std::vector<std::string>> query_result;
+      database::TransactionFactory::SelectRawDataSetWithCriteriaFrom(m_databases[database_name].m_containers[container_name],_Transform(filter_criteria),filter_comparison_params,data_set,[&](auto result){
+        std::for_each(result.begin(),result.end(),[&](auto pair){
+          std::vector<std::string>values;
+          std::transform(pair.second.begin(),pair.second.end(),std::back_inserter(values),[&](auto value){
+            return value.m_string;
+          });
+          query_result[pair.first] = values;
+        });
+      });
+      result(query_result);
+    }
+    else result({});
+  }
+  else result({});
+}
 
 #pragma mark Implementation for data manipulation
 void database::DatabaseEngine::ExecuteForDataDefinition(const database::Query& query,const std::function<void(bool)>& completion)
@@ -151,7 +186,10 @@ void database::DatabaseEngine::ExecuteForDataManipulation(const database::Query&
       SelectAllFromContainer(query.databaseName(),query.containerName(),result);
       break;
     case database::select_dataset:
-      #pragma mark TODO
+      if(query.selectConditions().empty())
+        SelectRawDataSetFromContainer(query.databaseName(),query.containerName(),query.selectDataset(),result);
+      else
+        exit(1);
       break;
     case database::update:
       #pragma mark TODO

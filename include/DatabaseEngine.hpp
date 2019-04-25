@@ -23,7 +23,8 @@ namespace database
     void CreateContainer(const std::string& database_name, const std::string& container_name, const std::map<std::string,database::QueryDataType>& container_schema,const std::function<void(bool)>& completion);
     void InsertIntoContainer(const std::string& database_name, const std::string& container_name, const std::map<std::string,std::string>& values,const std::function<void(const std::map<std::string,std::vector<std::string>>&)>& result);
     void SelectAllFromContainer(const std::string& database_name,const std::string& container_name,const std::function<void(const std::map<std::string,std::vector<std::string>>&)>& result);
-    void SelectDataSetFromContainer(const std::string& database_name,const std::string& container_name,const std::vector<std::string>& data_set,const std::function<void(const std::map<std::string,std::vector<std::string>>&)>& result);
+    void SelectRawDataSetFromContainer(const std::string& database_name,const std::string& container_name,const std::vector<std::string>& data_set,const std::function<void(const std::map<std::string,std::vector<std::string>>&)>& result);
+    void SelectRawDataSetFromContainerWithCriteria(const std::string& database_name,const std::string& container_name,const std::map<std::string,std::vector<std::string>>& filter_criteria,const std::map<std::string,std::vector<database::ComparisonType>>& filter_comparison_params,const std::vector<std::string>& data_set,const std::function<void(const std::map<std::string,std::vector<std::string>>&)>& lambda);
 
     #pragma mark Public api layer
     public:

@@ -24,6 +24,7 @@ namespace database
     std::map<std::string,std::string> m_select_conditions;
     std::map<std::string,std::string> m_update_data;
     std::map<std::string,std::string> m_update_conditions;
+    std::map<std::string,std::string> m_delete_conditions;
 
     #pragma mark Public accessors
     public:
@@ -37,6 +38,7 @@ namespace database
     std::map<std::string,std::string> selectConditions() const { return m_select_conditions; }
     std::map<std::string,std::string> updateDataset() const { return m_update_data; }
     std::map<std::string,std::string> updateConditions() const { return m_update_conditions; }
+    std::map<std::string,std::string> deleteConditions() const { return m_delete_conditions; }
 
     #pragma mark Public initializers and accessors
     public:

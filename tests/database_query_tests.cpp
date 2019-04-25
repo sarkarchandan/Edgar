@@ -130,3 +130,15 @@ TEST(QueryTests_Truncate,canDetermineSpecificationForTruncate)
   ASSERT_TRUE(query_truncate.databaseName() == "company");
   ASSERT_TRUE(query_truncate.containerName() == "employee");
 }
+
+TEST(QueryTests_DeleteFrom,canDetermineSpecificationForDeleteFrom)
+{
+  database::Query query_delete_from = "delete from company.employee where employee_id = 1";
+  ASSERT_TRUE(query_delete_from.transactionMetaType() == database::dml);
+  ASSERT_TRUE(query_delete_from.databaseName() == "company");
+  ASSERT_TRUE(query_delete_from.containerName() == "employee");
+  std::map<std::string,std::string> delete_conditions = {
+    {"employee_id","1"}
+  };
+  ASSERT_TRUE(query_delete_from.deleteConditions() == delete_conditions);
+}

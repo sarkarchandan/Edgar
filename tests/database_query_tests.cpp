@@ -34,21 +34,19 @@ TEST(QueryTests,canDeriveTransactionType)
   ASSERT_TRUE(query_update.transactionMetaType() == database::dml);
 
   ASSERT_TRUE(query_truncate.transactionType() == database::truncate);
-  // ASSERT_TRUE(query_truncate.transactionMetaType() == database::dml);
+  ASSERT_TRUE(query_truncate.transactionMetaType() == database::dml);
 
   ASSERT_TRUE(query_alter.transactionType() == database::alter);
-  // ASSERT_TRUE(query_alter.transactionMetaType() == database::ddl);
+  ASSERT_TRUE(query_alter.transactionMetaType() == database::ddl);
 
   ASSERT_TRUE(query_delete_from.transactionType() == database::delete_from);
-  // ASSERT_TRUE(query_delete_from.transactionMetaType() == database::dml);
+  ASSERT_TRUE(query_delete_from.transactionMetaType() == database::dml);
 
   ASSERT_TRUE(query_drop_container.transactionType() == database::drop_container);
-  // ASSERT_TRUE(query_drop_container.transactionMetaType() == database::ddl);
+  ASSERT_TRUE(query_drop_container.transactionMetaType() == database::ddl);
 
   ASSERT_TRUE(query_drop_database.transactionType() == database::drop_database);
-  // ASSERT_TRUE(query_drop_database.transactionMetaType() == database::ddl);
-
-  FAIL() << "Implement rest of the query parsing methods" << "\n";
+  ASSERT_TRUE(query_drop_database.transactionMetaType() == database::ddl);
 }
 
 TEST(QueryTests_CreateDatabase,canDetermineSpecificationForCreateDatabase)

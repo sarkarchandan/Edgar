@@ -209,13 +209,13 @@ void database::Query::_ParseQueryString()
   m_transaction_type = first_order_filter_result.first;
 
   //Create Database
-  if(m_transaction_type == database::TransactionType::create_database)
+  if(m_transaction_type == database::create_database)
   {
     m_transaction_metatype = database::ddl;
     m_database_name = first_order_filter_result.second;
   }
   //Create Container
-  else if(m_transaction_type == database::TransactionType::create_container)
+  else if(m_transaction_type == database::create_container)
   {
     m_transaction_metatype = database::ddl;
     std::string databaseName;
@@ -234,7 +234,7 @@ void database::Query::_ParseQueryString()
     });
     m_container_schema = containerSchema;
   }
-  else if(m_transaction_type == database::TransactionType::insert_into)
+  else if(m_transaction_type == database::insert_into)
   {
     m_transaction_metatype = database::dml;
     std::string databaseName;
@@ -253,7 +253,7 @@ void database::Query::_ParseQueryString()
     });
     m_insert_dataset = insertDataSet;
   }
-  else if(m_transaction_type == database::TransactionType::select_all)
+  else if(m_transaction_type == database::select_all)
   {
     m_transaction_metatype = database::dml;
     std::string databaseName;
@@ -265,7 +265,7 @@ void database::Query::_ParseQueryString()
     m_database_name = databaseName;
     m_container_name = containerName;
   }
-  else if(m_transaction_type == database::TransactionType::select_dataset)
+  else if(m_transaction_type == database::select_dataset)
   {
     m_transaction_metatype = database::dml;
     std::string databaseName;
@@ -292,7 +292,7 @@ void database::Query::_ParseQueryString()
     });
     m_select_conditions = _m_select_conditions;
   }
-  else if(m_transaction_type == database::TransactionType::update)
+  else if(m_transaction_type == database::update)
   {
     m_transaction_metatype = database::dml;
     std::string databaseName;
@@ -319,5 +319,24 @@ void database::Query::_ParseQueryString()
     m_update_data = _m_update_data;
     m_update_conditions = _m_update_conditions;
   }
-  #pragma mark Continue Query parsing...
+  else if(m_transaction_type == database::truncate)
+  {
+    m_transaction_metatype = database::dml;
+  }
+  else if(m_transaction_type == database::alter)
+  {
+    m_transaction_metatype = database::ddl;
+  }
+  else if(m_transaction_type == database::delete_from)
+  {
+    m_transaction_metatype = database::dml;
+  }
+  else if(m_transaction_type == database::drop_container)
+  {
+    m_transaction_metatype = database::ddl;
+  }
+  else if(m_transaction_type == database::drop_database)
+  {
+    m_transaction_metatype = database::ddl;
+  }
 }

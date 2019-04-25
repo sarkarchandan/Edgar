@@ -126,6 +126,7 @@ void _Tran_SelectDataSet_Data_Filter(const std::string& expression,const std::fu
 
 void _Tran_SelectDataSet_Conditions_Filter(const std::string& expression,const std::function<void(const std::map<std::string,std::string>&)>& lambda)
 {
+  #pragma mark Regard for the database::ComparisonType and provide necessary implementation
   //e.g. employee_id = 1
   std::regex regex("([[:w:]]+) = ([[:w:]]+)",std::regex_constants::icase);
   std::sregex_iterator pos = {expression.cbegin(),expression.cend(),regex};
@@ -175,6 +176,7 @@ void _Tran_Update_Data_Filter(const std::string& expression,const std::function<
 
 void _Tran_Update_Conditions_Filter(const std::string& expression,const std::function<void(const std::map<std::string,std::string>&)>& lambda)
 {
+  #pragma mark Regard for the database::ComparisonType and provide necessary implementation
   //e.g. employee_id = 1
   std::regex regex("([[:w:]]+) = ([[:w:]]+)",std::regex_constants::icase);
   std::sregex_iterator pos = {expression.cbegin(),expression.cend(),regex};

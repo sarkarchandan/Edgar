@@ -124,3 +124,9 @@ TEST(DatabaseEngineTests,canSelectDatasetFromContainer)
     ASSERT_TRUE(query_result == expected_result);
   });
 }
+
+
+TEST(DatabaseEngineTests,canSelectDatasetFromContainerWithCriteria)
+{
+  FAIL() << "Not properly implemented" << "\n";
+}

@@ -189,7 +189,8 @@ void database::DatabaseEngine::ExecuteForDataManipulation(const database::Query&
       if(query.selectConditions().empty())
         SelectRawDataSetFromContainer(query.databaseName(),query.containerName(),query.selectDataset(),result);
       else
-        exit(1);
+        #pragma mark Implement this
+        exit(EXIT_FAILURE);
       break;
     case database::update:
       #pragma mark TODO

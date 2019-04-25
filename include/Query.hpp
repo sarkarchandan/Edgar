@@ -28,6 +28,7 @@ namespace database
 
     #pragma mark Public accessors
     public:
+    std::string string_value() const { return m_query_string; }
     database::TransactionMetaType transactionMetaType() const { return m_transaction_metatype; }
     database::TransactionType transactionType() const { return m_transaction_type; }
     std::string databaseName() const { return m_database_name; }

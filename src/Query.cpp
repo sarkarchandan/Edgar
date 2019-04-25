@@ -389,5 +389,6 @@ void database::Query::_ParseQueryString()
   else if(m_transaction_type == database::drop_database)
   {
     m_transaction_metatype = database::ddl;
+    m_database_name = first_order_filter_result.second;
   }
 }

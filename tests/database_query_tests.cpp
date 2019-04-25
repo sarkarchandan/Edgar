@@ -150,3 +150,10 @@ TEST(QueryTests_DropContainer,canDetermineSpecificationForDropContainer)
   ASSERT_TRUE(query_drop_container.databaseName() == "company");
   ASSERT_TRUE(query_drop_container.containerName() == "employee");
 }
+
+TEST(QueryTests_DropDatabase,canDetermineSpecificationForDropDatabase)
+{
+  database::Query query_drop_database = "drop database company";
+  ASSERT_TRUE(query_drop_database.transactionMetaType() == database::ddl);
+  ASSERT_TRUE(query_drop_database.databaseName() == "company");
+}

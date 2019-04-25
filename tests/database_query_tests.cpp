@@ -142,3 +142,11 @@ TEST(QueryTests_DeleteFrom,canDetermineSpecificationForDeleteFrom)
   };
   ASSERT_TRUE(query_delete_from.deleteConditions() == delete_conditions);
 }
+
+TEST(QueryTests_DropContainer,canDetermineSpecificationForDropContainer)
+{
+  database::Query query_drop_container = "drop container company.employee";
+  ASSERT_TRUE(query_drop_container.transactionMetaType() == database::ddl);
+  ASSERT_TRUE(query_drop_container.databaseName() == "company");
+  ASSERT_TRUE(query_drop_container.containerName() == "employee");
+}

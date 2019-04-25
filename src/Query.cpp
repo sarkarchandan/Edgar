@@ -233,6 +233,18 @@ void _Tran_DeleteFrom_RootSeparator_Filter(const std::string& expression,const s
   lambda(databaseName,containerName,deleteConditions);
 }
 
+void _Tran_DropContainer_PrefixSeparator_Filter(const std::string& expression,const std::function<void(const std::string& databaseName,const std::string& containerName)>& lambda)
+{
+  //e.g. company.employee
+  std::regex regex("([[:w:]]+).([[:w:]]+)",std::regex_constants::icase);
+  std::smatch smatch;
+  if(!std::regex_search(expression,smatch,regex))
+    throw std::runtime_error("Invalid regular expression provided for extracting transaction parameters");
+  std::string databaseName = smatch[1].str();
+  std::string containerName = smatch[2].str();
+  lambda(databaseName,containerName);
+}
+
 std::pair<database::TransactionType,std::string> _Transaction_Filter(const std::string& expression)
 {
   std::regex tran_create_database("^CREATE DATABASE.",std::regex_constants::icase);
@@ -277,118 +289,80 @@ void database::Query::_ParseQueryString()
   else if(m_transaction_type == database::create_container)
   {
     m_transaction_metatype = database::ddl;
-    std::string databaseName;
-    std::string containerName;
     std::string schemaDetail;
     _Tran_CreateContainer_Root_Filter(first_order_filter_result.second,[&](auto _databaseName, auto _containerName, auto _schemaDetail){
-      databaseName = _databaseName;
-      containerName = _containerName;
+      m_database_name = _databaseName;
+      m_container_name = _containerName;
       schemaDetail = _schemaDetail;
     });
-    m_database_name = databaseName;
-    m_container_name = containerName;
-    std::map<std::string,database::QueryDataType> containerSchema;
     _Tran_CreateContainer_Schema_Filter(schemaDetail,[&](auto schema){
-      containerSchema = schema;
+      m_container_schema = schema;
     });
-    m_container_schema = containerSchema;
   }
   else if(m_transaction_type == database::insert_into)
   {
     m_transaction_metatype = database::dml;
-    std::string databaseName;
-    std::string containerName;
     std::string dataset;
     _Tran_InsertInto_Root_Filter(first_order_filter_result.second,[&](auto _databaseName, auto _containerName, auto _dataset){
-      databaseName = _databaseName;
-      containerName = _containerName;
+      m_database_name = _databaseName;
+      m_container_name = _containerName;
       dataset = _dataset;
     });
-    m_database_name = databaseName;
-    m_container_name = containerName;
-    std::map<std::string,std::string> insertDataSet;
     _Tran_InsertInto_Data_Filter(dataset,[&](auto _dataset){
-      insertDataSet = _dataset;
+      m_insert_dataset = _dataset;
     });
-    m_insert_dataset = insertDataSet;
   }
   else if(m_transaction_type == database::select_all)
   {
     m_transaction_metatype = database::dml;
-    std::string databaseName;
-    std::string containerName;
     _Tran_SelectAll_Root_Filter(first_order_filter_result.second,[&](auto _databaseName, auto _containerName){
-      databaseName = _databaseName;
-      containerName = _containerName;
+      m_database_name = _databaseName;
+      m_container_name = _containerName;
     });
-    m_database_name = databaseName;
-    m_container_name = containerName;
   }
   else if(m_transaction_type == database::select_dataset)
   {
     m_transaction_metatype = database::dml;
-    std::string databaseName;
-    std::string containerName;
     std::string dataset;
     std::string conditions;
     _Tran_SelectDataSet_Root_Filter(first_order_filter_result.second,[&](auto _dataset,auto _databaseName, auto _containerName, auto _conditions){
       dataset = _dataset;
-      databaseName = _databaseName;
-      containerName = _containerName;
+      m_database_name = _databaseName;
+      m_container_name = _containerName;
       conditions = _conditions;
     });
-    m_database_name = databaseName;
-    m_container_name = containerName;
-
-    std::vector<std::string> _m_dataset;
     _Tran_SelectDataSet_Data_Filter(dataset,[&](auto _dataset) {
-      _m_dataset = _dataset;
+      m_select_dataset = _dataset;
     });
-    m_select_dataset = _m_dataset;
-    std::map<std::string,std::string> _m_select_conditions;
     _Tran_SelectDataSet_Conditions_Filter(conditions,[&](auto _conditions){
-      _m_select_conditions = _conditions;
+      m_select_conditions = _conditions;
     });
-    m_select_conditions = _m_select_conditions;
   }
   else if(m_transaction_type == database::update)
   {
     m_transaction_metatype = database::dml;
-    std::string databaseName;
-    std::string containerName;
     std::string remainder_part;
     _Tran_Update_Root_Filter(first_order_filter_result.second,[&](auto _databaseName, auto _containerName, auto _remainder_part){
-      databaseName = _databaseName;
-      containerName = _containerName;
+      m_database_name = _databaseName;
+      m_container_name = _containerName;
       remainder_part = _remainder_part;
     });
-    m_database_name = databaseName;
-    m_container_name = containerName;
-
-    std::map<std::string,std::string> _m_update_data;
-    std::map<std::string,std::string> _m_update_conditions;
     _Tran_Update_Separator_Filter(remainder_part,[&](auto newData, auto conditions){
       _Tran_Update_Data_Filter(newData,[&](auto _new_data){
-        _m_update_data = _new_data;
+        m_update_data = _new_data;
       });
       _Tran_Update_Conditions_Filter(conditions,[&](auto _update_conditions){
-        _m_update_conditions = _update_conditions;
+        m_update_conditions = _update_conditions;
       });
     });
-    m_update_data = _m_update_data;
-    m_update_conditions = _m_update_conditions;
   }
   else if(m_transaction_type == database::truncate)
   {
     m_transaction_metatype = database::dml;
-    std::string databaseName;
-    std::string containerName;
     _Tran_Truncate_Root_Filter(first_order_filter_result.second,[&](auto _databaseName,auto _containerName){
-      databaseName = _databaseName;
-      containerName = _containerName;
+      m_database_name = _databaseName;
+      m_container_name = _containerName;
     });
-    m_database_name = databaseName;
-    m_container_name = containerName;
   }
   // else if(m_transaction_type == database::alter)
   // {
@@ -398,21 +372,19 @@ void database::Query::_ParseQueryString()
   else if(m_transaction_type == database::delete_from)
   {
     m_transaction_metatype = database::dml;
-    std::string databaseName;
-    std::string containerName;
-    std::map<std::string,std::string> deleteConditions;
     _Tran_DeleteFrom_RootSeparator_Filter(first_order_filter_result.second,[&](auto _databaseName,auto _containerName,auto _deleteConditions) {
-      databaseName = _databaseName;
-      containerName = _containerName;
-      deleteConditions = _deleteConditions;
+      m_database_name = _databaseName;
+      m_container_name = _containerName;
+      m_delete_conditions = _deleteConditions;
     });
-    m_database_name = databaseName;
-    m_container_name = containerName;
-    m_delete_conditions = deleteConditions;
   }
   else if(m_transaction_type == database::drop_container)
   {
     m_transaction_metatype = database::ddl;
+    _Tran_DropContainer_PrefixSeparator_Filter(first_order_filter_result.second,[&](auto _databaseName, auto _containerName){
+      m_database_name = _databaseName;
+      m_container_name = _containerName;
+    });
   }
   else if(m_transaction_type == database::drop_database)
   {

@@ -20,6 +20,7 @@ namespace database
   using api_insert_update_type = std::map<std::string,std::string>;
   using api_compare_type = std::vector<std::pair<std::string,database::ComparisonType>>;
   using api_filter_type = std::map<std::string,database::api_compare_type>;
+  
 }
 
 #endif //ALIASES_H

@@ -141,7 +141,7 @@ void database::Container::_SelectRawDataSetWithCriteria(const database::impl_fil
         switch (compare)
         {
           case equal_to: if(column[i] == value) _PopulateValueIfNotExisting(index_buffer,i); break;
-          case not_eqaul_to: if(column[i] != value) _PopulateValueIfNotExisting(index_buffer,i); break;
+          case not_equal_to: if(column[i] != value) _PopulateValueIfNotExisting(index_buffer,i); break;
           case greater_or_equal_to: if(column[i] >= value) _PopulateValueIfNotExisting(index_buffer,i); break;
           case lesser_or_equal_to: if(column[i] <= value) _PopulateValueIfNotExisting(index_buffer,i); break;
           case greater_than: if(column[i] > value) _PopulateValueIfNotExisting(index_buffer,i); break;
@@ -205,7 +205,7 @@ void database::Container::_Update(const database::impl_filter_type& filter_crite
         switch (compare)
         {
           case equal_to: if(column[i] == value) _UpdateValueForIndex(i,new_value); break;
-          case not_eqaul_to: if(column[i] != value) _UpdateValueForIndex(i,new_value); break;
+          case not_equal_to: if(column[i] != value) _UpdateValueForIndex(i,new_value); break;
           case greater_or_equal_to: if(column[i] >= value) _UpdateValueForIndex(i,new_value); break;
           case lesser_or_equal_to: if(column[i] <= value) _UpdateValueForIndex(i,new_value); break;
           case greater_than: if(column[i] > value) _UpdateValueForIndex(i,new_value); break;

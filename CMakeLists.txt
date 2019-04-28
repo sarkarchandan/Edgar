@@ -25,7 +25,7 @@ endif()
 
 set(SOURCES
     src/Query.cpp
-    src/DatabaseEngine.cpp
+    # src/DatabaseEngine.cpp
     src/TransactionFactory.cpp
     src/Container.cpp
 )

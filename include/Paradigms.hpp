@@ -27,7 +27,7 @@ namespace database
   enum ComparisonType
   {
     equal_to,
-    not_eqaul_to,
+    not_equal_to,
     greater_or_equal_to,
     lesser_or_equal_to,
     greater_than,

@@ -3,6 +3,7 @@
 #include "Database.hpp"
 #include "Query.hpp"
 #include <functional>
+#include "Aliases.hpp"
 
 namespace database
 {
@@ -19,17 +20,101 @@ namespace database
 
     #pragma mark Private implementation layer
     private:
-    void CreateDatabase(const std::string& database_name,const std::function<void(bool)>& completion);
-    void CreateContainer(const std::string& database_name, const std::string& container_name, const std::map<std::string,database::QueryDataType>& container_schema,const std::function<void(bool)>& completion);
-    void InsertIntoContainer(const std::string& database_name, const std::string& container_name, const std::map<std::string,std::string>& values,const std::function<void(const std::map<std::string,std::vector<std::string>>&)>& result);
-    void SelectAllFromContainer(const std::string& database_name,const std::string& container_name,const std::function<void(const std::map<std::string,std::vector<std::string>>&)>& result);
-    void SelectRawDataSetFromContainer(const std::string& database_name,const std::string& container_name,const std::vector<std::string>& data_set,const std::function<void(const std::map<std::string,std::vector<std::string>>&)>& result);
-    void SelectRawDataSetFromContainerWithCriteria(const std::string& database_name,const std::string& container_name,const std::map<std::string,std::vector<std::string>>& filter_criteria,const std::map<std::string,std::vector<database::ComparisonType>>& filter_comparison_params,const std::vector<std::string>& data_set,const std::function<void(const std::map<std::string,std::vector<std::string>>&)>& lambda);
+    /**
+     * Creates a database with a name
+     * @param name of the database
+     * @param lambda function indicating whether the operation is successful
+    */
+    void CreateDatabase(
+      const std::string& database_name,
+      const std::function<void(bool)>& completion);
+
+    /**
+     * Creates a container with name in a specified database
+     * @param name of the database
+     * @param name of the container
+     * @param schema for the container
+     * @param lambda function indicating whether the operation is successful 
+    */
+    void CreateContainer(
+      const std::string& database_name, 
+      const std::string& container_name, 
+      const database::api_schema_type& container_schema,
+      const std::function<void(bool)>& completion);
+
+    /**
+     * Inserts data into container
+     * @param name of the database
+     * @param name of the container
+     * @param values to be inserted
+     * @param lambda function where result of the operation is expected
+    */
+    void InsertIntoContainer(
+      const std::string& database_name, 
+      const std::string& container_name, 
+      const database::api_insert_update_type& values,
+      const std::function<void(const database::api_dataset_type&)>& result);
+
+    /**
+     * Selects all from a given container
+     * @param name of the database
+     * @param name of the container
+     * @param lambda function where result of the operation is expected
+    */
+    void SelectAllFromContainer(
+      const std::string& database_name,
+      const std::string& container_name,
+      const std::function<void(const database::api_dataset_type&)>& result);
+
+    /**
+     * Selects specified dataset from the container
+     * @param name of the database
+     * @param name of the container
+     * @param column names for which datset is required
+     * @param lambda function where result of the operation is expected
+    */
+    void SelectRawDataSetFromContainer(
+      const std::string& database_name,
+      const std::string& container_name,
+      const std::vector<std::string>& data_set,
+      const std::function<void(const database::api_dataset_type&)>& result);
+
+    /**
+     * Selects specified dataset from the container based on given criteria
+     * @param name of the database
+     * @param name of the container
+     * @param key-values which should be consideried for filtering of data
+     * @param key_values which should be regarded for comparison of data for filtering
+     * @param column names for which datset is required
+     * @param lambda function where result of the operation is expected
+    */
+    void SelectRawDataSetFromContainerWithCriteria(
+      const std::string& database_name,
+      const std::string& container_name,
+      const database::api_filter_type& filter_criteria,
+      const database::api_filtercompare_type& filter_comparison_params,
+      const std::vector<std::string>& data_set,
+      const std::function<void(const database::api_dataset_type&)>& lambda);
 
     #pragma mark Public api layer
     public:
-    void ExecuteForDataDefinition(const database::Query& query,const std::function<void(bool)>& completion);
-    void ExecuteForDataManipulation(const database::Query& query,const std::function<void(const std::map<std::string,std::vector<std::string>>&)>& result);
+    /**
+     * Executes a data definition query
+     * @param a data definition query
+     * @param lambda function indicating whether the operation is successful
+    */
+    void ExecuteForDataDefinition(
+      const database::Query& query,
+      const std::function<void(bool)>& completion);
+    
+    /**
+     * Executes a data manipulation query
+     * @param a data manipulation query
+     * @param lambda function where result of the operation is expected
+    */
+    void ExecuteForDataManipulation(
+      const database::Query& query,
+      const std::function<void(const database::api_dataset_type&)>& result);
   };
 }
 

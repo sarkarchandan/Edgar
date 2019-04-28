@@ -2,15 +2,30 @@
 #include "TransactionFactory.hpp"
 
 #pragma mark Implementation layer convenient methods
-std::map<std::string,std::vector<database::ComparableString>> _Transform(const std::map<std::string,std::vector<std::string>>& params)
+database::impl_filter_type Transform(const database::api_filter_type& params)
 {
-  std::map<std::string,std::vector<database::ComparableString>> modified_params;
+  database::impl_filter_type modified_params;
   std::for_each(params.begin(),params.end(),[&](auto pair) {
     std::vector<database::ComparableString> buffer;
     std::transform(pair.second.begin(),pair.second.end(),std::back_inserter(buffer),[&](auto value) { return value; });
     modified_params[pair.first] = buffer;
   });
   return modified_params;
+}
+
+database::impl_schema_type PrepareSchema(const database::api_schema_type& raw_schema)
+{
+  database::impl_schema_type schema;
+  std::for_each(raw_schema.begin(),raw_schema.end(),[&](auto pair) {
+    switch (pair.second)
+    {
+      case database::integer: schema[pair.first] = database::DataType::quantifiable; break;
+      case database::string: schema[pair.first] = database::DataType::non_quantifiable; break;
+      case database::boolean: schema[pair.first] = database::DataType::non_quantifiable; break;
+      default: break;
+    }
+  });
+  return schema;
 }
 
 #pragma mark Implementation for data definition
@@ -25,22 +40,7 @@ void database::DatabaseEngine::CreateDatabase(const std::string& database_name,c
   }
 }
 
-std::map<std::string,database::DataType> PrepareSchema(const std::map<std::string,database::QueryDataType>& raw_schema)
-{
-  std::map<std::string,database::DataType> schema;
-  std::for_each(raw_schema.begin(),raw_schema.end(),[&](auto pair) {
-    switch (pair.second)
-    {
-      case database::integer: schema[pair.first] = database::DataType::quantifiable; break;
-      case database::string: schema[pair.first] = database::DataType::non_quantifiable; break;
-      case database::boolean: schema[pair.first] = database::DataType::non_quantifiable; break;
-      default: break;
-    }
-  });
-  return schema;
-}
-
-void database::DatabaseEngine::CreateContainer(const std::string& database_name, const std::string& container_name, const std::map<std::string,database::QueryDataType>& container_schema,const std::function<void(bool)>& completion)
+void database::DatabaseEngine::CreateContainer(const std::string& database_name, const std::string& container_name, const database::api_schema_type& container_schema,const std::function<void(bool)>& completion)
 {
   if(m_databases.find(database_name) != m_databases.end())
   {
@@ -56,7 +56,7 @@ void database::DatabaseEngine::CreateContainer(const std::string& database_name,
   else completion(false);
 }
 
-void database::DatabaseEngine::InsertIntoContainer(const std::string& database_name, const std::string& container_name, const std::map<std::string,std::string>& values,const std::function<void(const std::map<std::string,std::vector<std::string>>&)>& result)
+void database::DatabaseEngine::InsertIntoContainer(const std::string& database_name, const std::string& container_name, const database::api_insert_update_type& values,const std::function<void(const database::api_dataset_type&)>& result)
 {
   if(m_databases.find(database_name) != m_databases.end())
   {
@@ -77,7 +77,7 @@ void database::DatabaseEngine::InsertIntoContainer(const std::string& database_n
   else result({});
 }
 
-void database::DatabaseEngine::SelectAllFromContainer(const std::string& database_name,const std::string& container_name,const std::function<void(const std::map<std::string,std::vector<std::string>>&)>& result)
+void database::DatabaseEngine::SelectAllFromContainer(const std::string& database_name,const std::string& container_name,const std::function<void(const database::api_dataset_type&)>& result)
 {
   if(m_databases.find(database_name) != m_databases.end())
   {
@@ -100,7 +100,7 @@ void database::DatabaseEngine::SelectAllFromContainer(const std::string& databas
   else result({});
 }
 
-void database::DatabaseEngine::SelectRawDataSetFromContainer(const std::string& database_name,const std::string& container_name,const std::vector<std::string>& data_set,const std::function<void(const std::map<std::string,std::vector<std::string>>&)>& result)
+void database::DatabaseEngine::SelectRawDataSetFromContainer(const std::string& database_name,const std::string& container_name,const std::vector<std::string>& data_set,const std::function<void(const database::api_dataset_type&)>& result)
 {
   if(m_databases.find(database_name) != m_databases.end())
   {
@@ -123,14 +123,14 @@ void database::DatabaseEngine::SelectRawDataSetFromContainer(const std::string& 
   else result({});
 }
 
-void database::DatabaseEngine::SelectRawDataSetFromContainerWithCriteria(const std::string& database_name,const std::string& container_name,const std::map<std::string,std::vector<std::string>>& filter_criteria,const std::map<std::string,std::vector<database::ComparisonType>>& filter_comparison_params,const std::vector<std::string>& data_set,const std::function<void(const std::map<std::string,std::vector<std::string>>&)>& result)
+void database::DatabaseEngine::SelectRawDataSetFromContainerWithCriteria(const std::string& database_name,const std::string& container_name,const database::api_filter_type& filter_criteria,const database::api_filtercompare_type& filter_comparison_params,const std::vector<std::string>& data_set,const std::function<void(const database::api_dataset_type&)>& result)
 {
   if(m_databases.find(database_name) != m_databases.end())
   {
     if(m_databases[database_name].m_containers.find(container_name) != m_databases[database_name].m_containers.end())
     {
       std::map<std::string,std::vector<std::string>> query_result;
-      database::TransactionFactory::SelectRawDataSetWithCriteriaFrom(m_databases[database_name].m_containers[container_name],_Transform(filter_criteria),filter_comparison_params,data_set,[&](auto result){
+      database::TransactionFactory::SelectRawDataSetWithCriteriaFrom(m_databases[database_name].m_containers[container_name],Transform(filter_criteria),filter_comparison_params,data_set,[&](auto result){
         std::for_each(result.begin(),result.end(),[&](auto pair){
           std::vector<std::string>values;
           std::transform(pair.second.begin(),pair.second.end(),std::back_inserter(values),[&](auto value){
@@ -173,7 +173,7 @@ void database::DatabaseEngine::ExecuteForDataDefinition(const database::Query& q
   }
 }
 
-void database::DatabaseEngine::ExecuteForDataManipulation(const database::Query& query,const std::function<void(const std::map<std::string,std::vector<std::string>>&)>& result)
+void database::DatabaseEngine::ExecuteForDataManipulation(const database::Query& query,const std::function<void(const database::api_dataset_type&)>& result)
 {
   if(query.transactionMetaType() != database::dml)
     throw std::runtime_error("Inappropriate query attempted. DML queries expected");

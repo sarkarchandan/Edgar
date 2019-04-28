@@ -177,55 +177,54 @@ void _ParseSelectDataSetFromContainerQuery(const std::string& expression,const s
     throw std::runtime_error("Invalid expression provided for extracting transaction parameters");
 }
 
-// void _Tran_Update_Root_Filter(const std::string& expression,const std::function<void(const std::string& databaseName,const std::string& containerName, const std::string& remainder_part)>& lambda)
-// {
-//   //e.g. company.employee set employee_name = Tim,employee_status = fulltime where employee_id = 1
-//   std::regex regex("([[:w:]]+).([[:w:]]+) set ",std::regex_constants::icase);
-//   std::smatch smatch;
-//   if(!std::regex_search(expression,smatch,regex))
-//     throw std::runtime_error("Invalid regular expression provided for extracting transaction parameters");
-//   std::string databaseName = smatch[1].str();
-//   std::string containerName = smatch[2].str();
-//   std::string remainder_part = smatch.suffix().str();
-//   lambda(databaseName,containerName,remainder_part);
-// }
+void _ParseUpdateContainerQuery_Separator(const std::string& expression,const std::function<void(const std::string& new_data_part, const std::string& filter_part)>& lambda)
+{
+  //e.g. employee_name = Tim,employee_status = fulltime where employee_id = 1
+  std::regex regex(".where.",std::regex_constants::icase);
+  std::smatch smatch;
+  if(!std::regex_search(expression,smatch,regex))
+    throw std::runtime_error("Invalid regular expression provided for extracting transaction parameters");
+  std::string newData = smatch.prefix().str();
+  std::string conditions = smatch.suffix().str();
+  lambda(newData,conditions);
+}
 
-// void _Tran_Update_Separator_Filter(const std::string& expression,const std::function<void(const std::string& newData, const std::string& conditions)>& lambda)
-// {
-//   //e.g. employee_name = Tim,employee_status = fulltime where employee_id = 1
-//   std::regex regex(".where.",std::regex_constants::icase);
-//   std::smatch smatch;
-//   if(!std::regex_search(expression,smatch,regex))
-//     throw std::runtime_error("Invalid regular expression provided for extracting transaction parameters");
-//   std::string newData = smatch.prefix().str();
-//   std::string conditions = smatch.suffix().str();
-//   lambda(newData,conditions);
-// }
+void _ParseUpdateContainerQuery_Data(const std::string& expression,const std::function<void(const database::api_insert_update_type&)>& lambda)
+{
+  //e.g. employee_name = Tim,employee_status = fulltime
+  std::regex regex("([[:w:]]+) = ([[:w:]]+)",std::regex_constants::icase);
+  std::sregex_iterator pos = {expression.cbegin(),expression.cend(),regex};
+  std::sregex_iterator end;
+  database::api_insert_update_type newData;
+  for(;pos != end; ++pos)
+    newData[pos -> str(1)] = pos -> str(2);
+  lambda(newData);
+}
 
-// void _Tran_Update_Data_Filter(const std::string& expression,const std::function<void(const std::map<std::string,std::string>&)>& lambda)
-// {
-//   //e.g. employee_name = Tim,employee_status = fulltime
-//   std::regex regex("([[:w:]]+) = ([[:w:]]+)",std::regex_constants::icase);
-//   std::sregex_iterator pos = {expression.cbegin(),expression.cend(),regex};
-//   std::sregex_iterator end;
-//   std::map<std::string,std::string> newData;
-//   for(;pos != end; ++pos)
-//     newData[pos -> str(1)] = pos -> str(2);
-//   lambda(newData);
-// }
+void _ParseUpdateContainerQuery(const std::string& expression,const std::function<void(const std::string& databaseName,const std::string& containerName, const database::api_insert_update_type& values,const database::api_filter_type& filter)>& lambda)
+{
+  //e.g. company.employee set employee_name = Tim,employee_status = fulltime where employee_id = 1
+  std::regex regex("([[:w:]]+).([[:w:]]+) set ",std::regex_constants::icase);
+  std::smatch root_smatch;
+  if(!std::regex_search(expression,root_smatch,regex))
+    throw std::runtime_error("Invalid regular expression provided for extracting transaction parameters");
+  std::string databaseName = root_smatch[1].str();
+  std::string containerName = root_smatch[2].str();
+  std::string remainder_part = root_smatch.suffix().str();
+  
+  database::api_insert_update_type values;
+  database::api_filter_type filter;
+  _ParseUpdateContainerQuery_Separator(remainder_part,[&](auto new_data_part,auto filter_part){
+    _ParseUpdateContainerQuery_Data(new_data_part,[&](auto _values){
+      values = _values;
+    });
+    _FilterParser(filter_part,[&](auto _filter) {
+      filter = _filter;
+    });
+  });
+  lambda(databaseName,containerName,values,filter);
+}
 
-// void _Tran_Update_Conditions_Filter(const std::string& expression,const std::function<void(const std::map<std::string,std::string>&)>& lambda)
-// {
-//   #pragma mark Regard for the database::ComparisonType and provide necessary implementation
-//   //e.g. employee_id = 1
-//   std::regex regex("([[:w:]]+) = ([[:w:]]+)",std::regex_constants::icase);
-//   std::sregex_iterator pos = {expression.cbegin(),expression.cend(),regex};
-//   std::sregex_iterator end;
-//   std::map<std::string,std::string> conditions;
-//   for(;pos != end; ++pos)
-//     conditions[pos -> str(1)] = pos -> str(2);
-//   lambda(conditions);
-// }
 
 // void _Tran_Truncate_Root_Filter(const std::string& expression,const std::function<void(const std::string& databaseName,const std::string& containerName)>& lambda)
 // {
@@ -350,7 +349,7 @@ void database::Query::_ParseQueryString()
     });
   }
 
-  //Insert Into Container
+  //Insert into Container
   else if(m_transaction_type == database::insert_into)
   {
     m_transaction_metatype = database::dml;
@@ -361,7 +360,7 @@ void database::Query::_ParseQueryString()
     });
   }
 
-  //Select All
+  //Select All from Container
   else if(m_transaction_type == database::select_all)
   {
     m_transaction_metatype = database::dml;
@@ -371,7 +370,7 @@ void database::Query::_ParseQueryString()
     });
   }
 
-  //Select Dataset
+  //Select Dataset from Container
   else if(m_transaction_type == database::select_dataset)
   {
     m_transaction_metatype = database::dml;
@@ -383,24 +382,19 @@ void database::Query::_ParseQueryString()
     });
   }
 
-  // else if(m_transaction_type == database::update)
-  // {
-  //   m_transaction_metatype = database::dml;
-  //   std::string remainder_part;
-  //   _Tran_Update_Root_Filter(first_order_filter_result.second,[&](auto _databaseName, auto _containerName, auto _remainder_part){
-  //     m_database_name = _databaseName;
-  //     m_container_name = _containerName;
-  //     remainder_part = _remainder_part;
-  //   });
-  //   _Tran_Update_Separator_Filter(remainder_part,[&](auto newData, auto conditions){
-  //     _Tran_Update_Data_Filter(newData,[&](auto _new_data){
-  //       m_update_data = _new_data;
-  //     });
-  //     _Tran_Update_Conditions_Filter(conditions,[&](auto _update_conditions){
-  //       m_update_conditions = _update_conditions;
-  //     });
-  //   });
-  // }
+  //Update Container
+  else if(m_transaction_type == database::update)
+  {
+    m_transaction_metatype = database::dml;
+    _ParseUpdateContainerQuery(first_order_filter_result.second,[&](auto databaseName, auto containerName, auto values,auto filter){
+      m_database_name = databaseName;
+      m_container_name = containerName;
+      m_values = values;
+      m_filter = filter;
+    });
+  }
+
+
   // else if(m_transaction_type == database::truncate)
   // {
   //   m_transaction_metatype = database::dml;

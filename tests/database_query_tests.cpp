@@ -10,7 +10,7 @@ TEST(QueryTests,canDeriveTransactionType)
   database::Query query_select_all = "select * from company.employee";
   database::Query query_select_dataset = "select employee_id,employee_name from company.employee";
   database::Query query_select_dataset_with_criteria = "select employee_id,employee_name from company.employee where employee_id = 1";
-  // database::Query query_update = "update company.employee set employee_status = fulltime where employee_id = 1";
+  database::Query query_update = "update company.employee set employee_status = fulltime where employee_id = 1";
   // database::Query query_truncate = "truncate container company.employee";
   // database::Query query_alter = "alter container company.employee delete column employee_status";
   // database::Query query_delete_from = "delete from company.employee where employee_id = 1";
@@ -35,9 +35,9 @@ TEST(QueryTests,canDeriveTransactionType)
   ASSERT_TRUE(query_select_dataset_with_criteria.transactionType() == database::select_dataset);
   ASSERT_TRUE(query_select_dataset_with_criteria.transactionMetaType() == database::dml);
 
-  // ASSERT_TRUE(query_update.transactionType() == database::update);
-  // ASSERT_TRUE(query_update.transactionMetaType() == database::dml);
-  //
+  ASSERT_TRUE(query_update.transactionType() == database::update);
+  ASSERT_TRUE(query_update.transactionMetaType() == database::dml);
+
   // ASSERT_TRUE(query_truncate.transactionType() == database::truncate);
   // ASSERT_TRUE(query_truncate.transactionMetaType() == database::dml);
 
@@ -140,6 +140,7 @@ TEST(QueryTests_SelectDataSetWithCriteria,canDetermineSpecificationForSelectData
   ASSERT_TRUE(query_select_dataset_with_criteria3.transactionMetaType() == database::dml);
   ASSERT_TRUE(query_select_dataset_with_criteria3.databaseName() == "company");
   ASSERT_TRUE(query_select_dataset_with_criteria3.containerName() == "employee");
+  std::cout << "Expected dataset: " << query_select_dataset_with_criteria3.dataset() << "\n";
   std::vector<std::string> expected_dataset3 = {"employee_id","employee_name","employee_status"};
   ASSERT_TRUE(query_select_dataset_with_criteria3.dataset() == expected_dataset3);
   database::api_filter_type filter3 = {
@@ -148,23 +149,40 @@ TEST(QueryTests_SelectDataSetWithCriteria,canDetermineSpecificationForSelectData
   ASSERT_TRUE(query_select_dataset_with_criteria3.filter() == filter3);
 }
 
-// TEST(QueryTests_Update,canDetermineSpecificationForUpdate)
-// {
-//   database::Query query_update = "update company.employee set employee_name = Tim,employee_status = fulltime where employee_id = 1";
-//   ASSERT_TRUE(query_update.transactionMetaType() == database::dml);
-//   ASSERT_TRUE(query_update.databaseName() == "company");
-//   ASSERT_TRUE(query_update.containerName() == "employee");
-//   std::map<std::string,std::string> update_data = {
-//     {"employee_name","Tim"},
-//     {"employee_status","fulltime"}
-//   };
-//   std::map<std::string,std::string> update_conditions = {
-//     {"employee_id","1"}
-//   };
-//   ASSERT_TRUE(query_update.updateDataset() == update_data);
-//   ASSERT_TRUE(query_update.updateConditions() == update_conditions);
-// }
-//
+TEST(QueryTests_Update,canDetermineSpecificationForUpdate)
+{
+  database::Query query_update1 = "update company.employee set employee_name = Tim,employee_status = fulltime where employee_id = 1";
+  ASSERT_TRUE(query_update1.transactionType() == database::update);
+  ASSERT_TRUE(query_update1.transactionMetaType() == database::dml);
+  ASSERT_TRUE(query_update1.databaseName() == "company");
+  ASSERT_TRUE(query_update1.containerName() == "employee");
+
+  database::api_insert_update_type update_data1 = {
+    {"employee_name","Tim"},
+    {"employee_status","fulltime"}
+  };
+  database::api_filter_type filter1 = {
+    {"employee_id",{{"1",database::equal_to}}}
+  };
+  ASSERT_TRUE(query_update1.values() == update_data1);
+  ASSERT_TRUE(query_update1.filter() == filter1);
+
+  database::Query query_update2 = "update company.employee set employee_status = fulltime where where employee_join_date >= 20180301 and employee_join_date <= 20190101 and employee_status = parttime";
+  ASSERT_TRUE(query_update2.transactionType() == database::update);
+  ASSERT_TRUE(query_update2.transactionMetaType() == database::dml);
+  ASSERT_TRUE(query_update2.databaseName() == "company");
+  ASSERT_TRUE(query_update2.containerName() == "employee");
+  database::api_insert_update_type update_data2 = {
+    {"employee_status","fulltime"}
+  };
+  database::api_filter_type filter2 = {
+    {"employee_join_date",{{"20180301",database::greater_or_equal_to},{"20190101",database::lesser_or_equal_to}}},
+    {"employee_status",{{"parttime",database::equal_to}}}
+  };
+  ASSERT_TRUE(query_update2.values() == update_data2);
+  ASSERT_TRUE(query_update2.filter() == filter2);
+}
+
 // TEST(QueryTests_Truncate,canDetermineSpecificationForTruncate)
 // {
 //   database::Query query_truncate = "truncate container company.employee";

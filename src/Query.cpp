@@ -11,6 +11,54 @@ std::string _Get_Transaction_Detail(const std::string& expression,const std::reg
   return transactionParameters;
 }
 
+void _Process_For_Regex(const std::string& expression,const std::regex& regex,std::map<std::string,std::string>& filter_criteria)
+{
+  std::sregex_iterator pos = {expression.cbegin(),expression.cend(),regex};
+  std::sregex_iterator end;
+  for(;pos != end; ++pos)
+    filter_criteria[pos -> str(1)] = pos -> str(2);
+}
+
+void _Conditions_Filter(const std::string& expression,const std::function<void(const std::map<std::string,std::string>&,const std::map<std::string,database::ComparisonType>)>& lambda)
+{
+  //e.g. employee_id = 1
+  std::regex regex_equal_to("([[:w:]]+) = ([[:w:]]+)",std::regex_constants::icase);
+  std::regex regex_not_equal_to("([[:w:]]+) <> ([[:w:]]+)",std::regex_constants::icase);
+  std::regex regex_greater_or_equal_to("([[:w:]]+) >= ([[:w:]]+)",std::regex_constants::icase);
+  std::regex regex_lesser_or_equal_to("([[:w:]]+) <= ([[:w:]]+)",std::regex_constants::icase);
+  std::regex regex_greater_than("([[:w:]]+) > ([[:w:]]+)",std::regex_constants::icase);
+  std::regex regex_lesser_than("([[:w:]]+) < ([[:w:]]+)",std::regex_constants::icase);
+  std::map<std::string,database::ComparisonType> filter_compare_params;
+  if(std::regex_search(expression,regex_equal_to))
+  {
+    
+  }
+  if(std::regex_search(expression,regex_not_equal_to))
+  {
+
+  }
+  if(std::regex_search(expression,regex_greater_or_equal_to))
+  {
+
+  }
+  if(std::regex_search(expression,regex_lesser_or_equal_to))
+  {
+
+  }
+  if(std::regex_search(expression,regex_greater_than))
+  {
+
+  }
+  if(std::regex_search(expression,regex_lesser_than))
+  {
+
+  }
+
+  std::map<std::string,std::string> filter_criteria;
+  std::map<std::string,database::ComparisonType> filter_comparisons;
+  
+}
+
 void _Tran_CreateContainer_Root_Filter(const std::string& expression,const std::function<void(const std::string& databaseName,const std::string& containerName, const std::string& schemaDetail)>& lambda)
 {
   //e.g. company.employee(employee_id int,employee_name string,employee_status string)
@@ -86,8 +134,6 @@ void _Tran_SelectAll_Root_Filter(const std::string& expression,const std::functi
   std::string containerName = smatch[2].str();
   lambda(databaseName,containerName);
 }
-
-
 
 void _Tran_SelectDataSet_Root_Filter(const std::string& expression,const std::function<void(const std::string& dataset,const std::string& databaseName,const std::string& containerName, const std::string& conditions)>& lambda)
 {

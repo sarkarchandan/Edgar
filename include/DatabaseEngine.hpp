@@ -83,7 +83,6 @@ namespace database
      * Selects specified dataset from the container based on given criteria
      * @param name of the database
      * @param name of the container
-     * @param key-values which should be consideried for filtering of data
      * @param key_values which should be regarded for comparison of data for filtering
      * @param column names for which datset is required
      * @param lambda function where result of the operation is expected
@@ -92,7 +91,6 @@ namespace database
       const std::string& database_name,
       const std::string& container_name,
       const database::api_filter_type& filter_criteria,
-      const database::api_filtercompare_type& filter_comparison_params,
       const std::vector<std::string>& data_set,
       const std::function<void(const database::api_dataset_type&)>& lambda);
 

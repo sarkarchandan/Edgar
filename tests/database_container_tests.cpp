@@ -110,8 +110,7 @@ TEST(ContainerTests,canStoreAndRetrieveDataBasedOnSingleCriterion)
     {"p_name",{(std::string)"Ulrike",(std::string)"Heinrich",(std::string)"Dominik",(std::string)"Mathias",(std::string)"Steve",(std::string)"Sam"}}
   };
   database::TransactionFactory::SelectRawDataSetWithCriteriaFrom(container,
-    {{"p_country",{(std::string)"DE",(std::string)"NZ"}}},
-    {{"p_country",{database::ComparisonType::equal_to,database::ComparisonType::equal_to}}},
+    {{"p_country",{std::make_pair<database::ComparableString,database::ComparisonType>((std::string)"DE",database::ComparisonType::equal_to),std::make_pair<database::ComparableString,database::ComparisonType>((std::string)"NZ",database::equal_to)}}},
     {},[&](auto query_result){
     ASSERT_TRUE(query_result == expected_result1);
   });
@@ -122,8 +121,7 @@ TEST(ContainerTests,canStoreAndRetrieveDataBasedOnSingleCriterion)
     {"p_name",{(std::string)"John",(std::string)"Tim",(std::string)"Steve",(std::string)"Mark",(std::string)"Sam"}}
   };
   database::TransactionFactory::SelectRawDataSetWithCriteriaFrom(container,
-    {{"p_country",{(std::string)"DE"}}},
-    {{"p_country",{database::ComparisonType::not_eqaul_to}}},
+    {{"p_country",{std::make_pair<database::ComparableString,database::ComparisonType>((std::string)"DE",database::not_eqaul_to)}}},
     {},[&](auto query_result) {
     ASSERT_TRUE(query_result == expected_result2);
   });
@@ -133,8 +131,7 @@ TEST(ContainerTests,canStoreAndRetrieveDataBasedOnSingleCriterion)
     {"p_name",{(std::string)"John",(std::string)"Tim",(std::string)"Mark"}}
   };
   database::TransactionFactory::SelectRawDataSetWithCriteriaFrom(container,
-    {{"p_country",{(std::string)"US",(std::string)"AU"}}},
-    {{"p_country",{database::ComparisonType::equal_to,database::ComparisonType::equal_to}}},
+    {{"p_country",{std::make_pair<database::ComparableString,database::ComparisonType>((std::string)"US",database::equal_to),std::make_pair<database::ComparableString,database::ComparisonType>((std::string)"AU",database::equal_to)}}},
     {"p_id","p_name"},[&](auto query_result) {
     ASSERT_TRUE(query_result == expected_result3);
   });
@@ -200,8 +197,7 @@ TEST(ContainerTests,canUpdateDataBasedOnSingleCriterion)
   database::TransactionFactory::InsertInto(container,value5);
   database::TransactionFactory::InsertInto(container,value6);
   database::TransactionFactory::Update(container,
-    {{"emp_start_date",{database::Date::With_ddmmyyyy(11042018).string_value()}}},
-    {{"emp_start_date",{database::ComparisonType::lesser_or_equal_to}}},
+    {{"emp_start_date",{std::make_pair<database::ComparableString,database::ComparisonType>(database::Date::With_ddmmyyyy(11042018).string_value(),database::lesser_or_equal_to)}}},
     {{"emp_status",(std::string)"FULLTIME"}}
   );
   std::map<std::string,std::vector<database::ComparableString>> expected_result1 = {

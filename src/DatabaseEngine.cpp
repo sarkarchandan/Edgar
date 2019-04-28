@@ -2,15 +2,18 @@
 #include "TransactionFactory.hpp"
 
 #pragma mark Implementation layer convenient methods
-database::impl_filter_type Transform(const database::api_filter_type& params)
+database::impl_filter_type Transform(const database::api_filter_type& api_filter_params)
 {
-  database::impl_filter_type modified_params;
-  std::for_each(params.begin(),params.end(),[&](auto pair) {
-    std::vector<database::ComparableString> buffer;
-    std::transform(pair.second.begin(),pair.second.end(),std::back_inserter(buffer),[&](auto value) { return value; });
-    modified_params[pair.first] = buffer;
+  database::impl_filter_type impl_filter_params;
+  std::for_each(api_filter_params.begin(),api_filter_params.end(),[&](auto map_level_pair) {
+    database::impl_compare_type buffer;
+    std::for_each(map_level_pair.second.begin(),map_level_pair.second.end(),[&](auto vector_level_pair) {
+      std::pair<database::ComparableString,database::ComparisonType> impl_comp_pair = {vector_level_pair.first,vector_level_pair.second};
+      buffer.emplace_back(impl_comp_pair);
+    });
+    impl_filter_params[map_level_pair.first] = buffer;
   });
-  return modified_params;
+  return impl_filter_params;
 }
 
 database::impl_schema_type PrepareSchema(const database::api_schema_type& raw_schema)
@@ -123,14 +126,14 @@ void database::DatabaseEngine::SelectRawDataSetFromContainer(const std::string& 
   else result({});
 }
 
-void database::DatabaseEngine::SelectRawDataSetFromContainerWithCriteria(const std::string& database_name,const std::string& container_name,const database::api_filter_type& filter_criteria,const database::api_filtercompare_type& filter_comparison_params,const std::vector<std::string>& data_set,const std::function<void(const database::api_dataset_type&)>& result)
+void database::DatabaseEngine::SelectRawDataSetFromContainerWithCriteria(const std::string& database_name,const std::string& container_name,const database::api_filter_type& filter_criteria,const std::vector<std::string>& data_set,const std::function<void(const database::api_dataset_type&)>& result)
 {
   if(m_databases.find(database_name) != m_databases.end())
   {
     if(m_databases[database_name].m_containers.find(container_name) != m_databases[database_name].m_containers.end())
     {
       std::map<std::string,std::vector<std::string>> query_result;
-      database::TransactionFactory::SelectRawDataSetWithCriteriaFrom(m_databases[database_name].m_containers[container_name],Transform(filter_criteria),filter_comparison_params,data_set,[&](auto result){
+      database::TransactionFactory::SelectRawDataSetWithCriteriaFrom(m_databases[database_name].m_containers[container_name],Transform(filter_criteria),data_set,[&](auto result){
         std::for_each(result.begin(),result.end(),[&](auto pair){
           std::vector<std::string>values;
           std::transform(pair.second.begin(),pair.second.end(),std::back_inserter(values),[&](auto value){

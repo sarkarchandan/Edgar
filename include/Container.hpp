@@ -104,23 +104,21 @@ namespace database
       const std::function<void(const database::impl_dataset_type&)>& lambda) const;
     void _SelectRawDataSetWithCriteria(
       const database::impl_filter_type& filter_criteria,
-      const database::impl_filtercompare_type& filter_comparison_params,
       const std::vector<std::string>& dataset,
       const std::function<void(const database::impl_dataset_type&)>& lambda) const;
 
     //Update data in the container with given filter criteria
-    void _UpdateValueForIndex(const std::size_t& index,const impl_insert_update_type& new_value);
+    void _UpdateValueForIndex(
+      const std::size_t& index,
+      const impl_insert_update_type& new_value);
 
     void _Update(
       const database::impl_filter_type& filter_criteria,
-      const database::impl_filtercompare_type& filter_comparison_params,
-      const database::impl_insert_update_type& new_value
-    );
+      const database::impl_insert_update_type& new_value);
 
     //Delete data from container with given filter criteria
     void _DeleteFrom(
-      const database::impl_filter_type& filter_criteria,
-      const database::impl_filtercompare_type& filter_comparison_params);
+      const database::impl_filter_type& filter_criteria);
 
     //Delete all data from the container keeping the schema intact
     void _Truncate();

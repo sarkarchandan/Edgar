@@ -51,8 +51,13 @@ namespace database
      * @param columns for which data should be selected
      * @param lambda function where the result is expected
     */
-    static void SelectRawDataSetWithCriteriaFrom(const database::Container& container,const std::map<std::string,std::vector<database::ComparableString>>& filter_criteria,const std::map<std::string,std::vector<database::ComparisonType>>& filter_comparison_params,const std::vector<std::string>& dataset,const std::function<void(const std::map<std::string,std::vector<database::ComparableString>>&)>& lambda);
-
+    static void SelectRawDataSetWithCriteriaFrom(
+      const database::Container& container,
+      const std::map<std::string,std::vector<database::ComparableString>>& filter_criteria,
+      const std::map<std::string,std::vector<database::ComparisonType>>& filter_comparison_params,const std::vector<std::string>& dataset,
+      const std::function<void(const std::map<std::string,std::vector<database::ComparableString>>&)>& lambda
+      );
+      
     /**
      * Updates data in the container based on the passed in criteria
      * @param container

@@ -1,13 +1,10 @@
 #ifndef CONTAINER_H
 #define CONTAINER_H
-#include "ComparableString.hpp"
-#include <vector>
 #include <exception>
-#include <map>
 #include <memory>
 #include <stdexcept>
-#include "Paradigms.hpp"
 #include <functional>
+#include "Aliases.hpp"
 
 namespace database
 {
@@ -17,14 +14,14 @@ namespace database
     private:
     std::size_t m_id;
     std::string m_name;
-    std::map<std::string,database::DataType> m_schema;
-    std::unique_ptr<std::vector<std::vector<database::ComparableString>>> m_data;
+    database::impl_schema_type m_schema;
+    std::unique_ptr<database::impl_storage_type> m_data;
 
     friend class TransactionFactory;
 
     #pragma mark Private initializer
     private:
-    Container(const std::string& name,const std::map<std::string,database::DataType>& schema)
+    Container(const std::string& name,const database::impl_schema_type& schema)
     :m_name(name),m_schema(schema) { _PrepareContainer(); }
     #pragma mark Public deallocator,copy initializers and accessors
     public:
@@ -33,7 +30,7 @@ namespace database
       m_id = 0;
       m_name = "";
       m_schema = {};
-      m_data = std::make_unique<std::vector<std::vector<database::ComparableString>>>();
+      m_data = std::make_unique<database::impl_storage_type>();
     }
     ~Container() { m_data.release(); }
     Container(const database::Container& container)
@@ -42,7 +39,7 @@ namespace database
       this -> m_name = container.m_name;
       this -> m_schema = container.m_schema;
 
-      this -> m_data = std::make_unique<std::vector<std::vector<database::ComparableString>>>();
+      this -> m_data = std::make_unique<database::impl_storage_type>();
       this -> m_data -> reserve(container.m_data -> size());
       std::for_each(container.m_data -> begin(),container.m_data -> end(),[&](auto column){
         std::vector<database::ComparableString> buffer;
@@ -60,7 +57,7 @@ namespace database
       this -> m_name = container.m_name;
       this -> m_schema = container.m_schema;
 
-      this -> m_data = std::make_unique<std::vector<std::vector<database::ComparableString>>>();
+      this -> m_data = std::make_unique<database::impl_storage_type>();
       this -> m_data -> reserve(container.m_data -> size());
       std::for_each(container.m_data -> begin(),container.m_data -> end(),[&](auto column){
         std::vector<database::ComparableString> buffer;
@@ -75,30 +72,55 @@ namespace database
 
     std::string name() const;
     std::size_t id() const;
-    std::map<std::string,database::DataType> schema() const;
+    database::impl_schema_type schema() const;
 
     #pragma mark Private implementation layer
     private:
     void _PrepareContainer();
 
     //Insert data into Container
-    bool _HaveSameKeysFor(const std::map<std::string,database::ComparableString>& lhs, const std::map<std::string,database::DataType>& rhs) const;
-    void _InsertInto(const std::map<std::string,database::ComparableString> values);
+    bool _HaveSameKeysFor(
+      const database::impl_insert_update_type& lhs, 
+      const database::impl_schema_type& rhs
+    ) const;
+    void _InsertInto(
+      const impl_insert_update_type& values
+    );
 
     //Select from container with given filter criteria
-    bool _IsValidFilterCriteriaForRawSelection(const std::map<std::string,std::vector<database::ComparableString>>& filter_criteria) const;
-    bool _IsValidFilterCriteriaForAggregateSelection(const std::map<std::string,std::vector<database::ComparableString>>& filter_criteria) const;
-    bool _IsValidDataSetRequested(const std::vector<std::string>& dataset) const;
-    void _SelectAll(const std::function<void(const std::map<std::string,std::vector<database::ComparableString>>&)>& lambda) const;
-    void _SelectRawDataSet(const std::vector<std::string>& dataset,const std::function<void(const std::map<std::string,std::vector<database::ComparableString>>&)>& lambda) const;
-    void _SelectRawDataSetWithCriteria(const std::map<std::string,std::vector<database::ComparableString>>& filter_criteria,const std::map<std::string,std::vector<database::ComparisonType>>& filter_comparison_params,const std::vector<std::string>& dataset,const std::function<void(const std::map<std::string,std::vector<database::ComparableString>>&)>& lambda) const;
+    bool _IsValidFilterCriteriaForRawSelection(
+      const database::impl_filter_type& filter_criteria) const;
+
+    bool _IsValidFilterCriteriaForAggregateSelection(
+      const database::impl_filter_type& filter_criteria) const;
+
+    bool _IsValidDataSetRequested(
+      const std::vector<std::string>& dataset) const;
+
+    void _SelectAll(
+      const std::function<void(const database::impl_dataset_type&)>& lambda) const;
+    void _SelectRawDataSet(
+      const std::vector<std::string>& dataset,
+      const std::function<void(const database::impl_dataset_type&)>& lambda) const;
+    void _SelectRawDataSetWithCriteria(
+      const database::impl_filter_type& filter_criteria,
+      const database::impl_filtercompare_type& filter_comparison_params,
+      const std::vector<std::string>& dataset,
+      const std::function<void(const database::impl_dataset_type&)>& lambda) const;
 
     //Update data in the container with given filter criteria
-    void _UpdateValueForIndex(const std::size_t& index,const std::map<std::string,database::ComparableString>& new_value);
-    void _Update(const std::map<std::string,std::vector<database::ComparableString>>& filter_criteria,const std::map<std::string,std::vector<database::ComparisonType>>& filter_comparison_params,const std::map<std::string,database::ComparableString>& new_value);
+    void _UpdateValueForIndex(const std::size_t& index,const impl_insert_update_type& new_value);
+
+    void _Update(
+      const database::impl_filter_type& filter_criteria,
+      const database::impl_filtercompare_type& filter_comparison_params,
+      const database::impl_insert_update_type& new_value
+    );
 
     //Delete data from container with given filter criteria
-    void _DeleteFrom(const std::map<std::string,std::vector<database::ComparableString>>& filter_criteria,const std::map<std::string,std::vector<database::ComparisonType>>& filter_comparison_params);
+    void _DeleteFrom(
+      const database::impl_filter_type& filter_criteria,
+      const database::impl_filtercompare_type& filter_comparison_params);
 
     //Delete all data from the container keeping the schema intact
     void _Truncate();

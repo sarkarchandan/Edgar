@@ -19,21 +19,27 @@ namespace database
      * @param name of the container
      * @param schema for the container
     */
-    static database::Container ContainerWith_Name_Schema(const std::string& container_name, const std::map<std::string,DataType>& container_schema);
+    static database::Container ContainerWith_Name_Schema(
+      const std::string& container_name, 
+      const std::map<std::string,DataType>& container_schema);
 
     /**
      * Inserts data into the container
      * @param container
      * @param values to be inserted (can be compared as the set of key-value mapping between the column name and the data)
     */
-    static void InsertInto(database::Container& container, const std::map<std::string,database::ComparableString>& values);
+    static void InsertInto(
+      database::Container& container, 
+      const database::impl_insert_update_type& values);
 
     /**
      * Selects all data from the container
      * @param container
      * @param lambda function where the result is expected
     */
-    static void SelectAllFrom(const database::Container& container,const std::function<void(const std::map<std::string,std::vector<database::ComparableString>>&)>& lambda);
+    static void SelectAllFrom(
+      const database::Container& container,
+      const std::function<void(const database::impl_dataset_type&)>& lambda);
 
     /**
      * Selects chosen dataset from the container
@@ -41,7 +47,10 @@ namespace database
      * @param required columns
      * @param lambda function where the result is expected
     */
-    static void SelectRawDataSetFrom(const database::Container& container, const std::vector<std::string>& dataset,const std::function<void(const std::map<std::string,std::vector<database::ComparableString>>&)>& lambda);
+    static void SelectRawDataSetFrom(
+      const database::Container& container, 
+      const std::vector<std::string>& dataset,
+      const std::function<void(const database::impl_dataset_type&)>& lambda);
 
     /**
      * Selects data from the container based based on some criteria
@@ -53,10 +62,10 @@ namespace database
     */
     static void SelectRawDataSetWithCriteriaFrom(
       const database::Container& container,
-      const std::map<std::string,std::vector<database::ComparableString>>& filter_criteria,
-      const std::map<std::string,std::vector<database::ComparisonType>>& filter_comparison_params,const std::vector<std::string>& dataset,
-      const std::function<void(const std::map<std::string,std::vector<database::ComparableString>>&)>& lambda
-      );
+      const database::impl_filter_type& filter_criteria,
+      const database::impl_filtercompare_type& filter_comparison_params,
+      const std::vector<std::string>& dataset,
+      const std::function<void(const database::impl_dataset_type&)>& lambda);
       
     /**
      * Updates data in the container based on the passed in criteria
@@ -65,7 +74,11 @@ namespace database
      * @param key_values which should be regarded for comparison of data for filtering
      * @param key-values representing the new values which should be updated
     */
-    static void Update(database::Container& container,const std::map<std::string,std::vector<database::ComparableString>>& filter_criteria,const std::map<std::string,std::vector<database::ComparisonType>>& filter_comparison_params,const std::map<std::string,database::ComparableString>& new_value);
+    static void Update(
+      database::Container& container,
+      const database::impl_filter_type& filter_criteria,
+      const database::impl_filtercompare_type& filter_comparison_params,
+      const database::impl_insert_update_type& new_value);
 
     /**
      * Deletes data from the container based on the passed in criteria
@@ -73,7 +86,10 @@ namespace database
      * @param key-values which should be consideried for filtering of data
      * @param key_values which should be regarded for comparison of data for filtering
     */
-    static void DeleteFrom(database::Container& container,const std::map<std::string,std::vector<database::ComparableString>>& filter_criteria,const std::map<std::string,std::vector<database::ComparisonType>>& filter_comparison_params);
+    static void DeleteFrom(
+      database::Container& container,
+      const database::impl_filter_type& filter_criteria,
+      const database::impl_filtercompare_type& filter_comparison_params);
 
     /**
      * Deletes all data from the container keeping the schema intact

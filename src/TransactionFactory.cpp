@@ -1,37 +1,37 @@
 #include "TransactionFactory.hpp"
 
-database::Container database::TransactionFactory::ContainerWith_Name_Schema(const std::string& container_name, const std::map<std::string,database::DataType>& container_schema)
+database::Container database::TransactionFactory::ContainerWith_Name_Schema(const std::string& container_name, const database::impl_schema_type& container_schema)
 {
   database::Container container = {container_name,container_schema};
   return container;
 }
 
-void database::TransactionFactory::InsertInto(database::Container& container, const std::map<std::string,database::ComparableString>& values)
+void database::TransactionFactory::InsertInto(database::Container& container, const database::impl_insert_update_type& values)
 {
   container._InsertInto(values);
 }
 
-void database::TransactionFactory::SelectAllFrom(const database::Container& container,const std::function<void(const std::map<std::string,std::vector<database::ComparableString>>&)>& lambda)
+void database::TransactionFactory::SelectAllFrom(const database::Container& container,const std::function<void(const database::impl_dataset_type&)>& lambda)
 {
   container._SelectAll(lambda);
 }
 
-void database::TransactionFactory::SelectRawDataSetFrom(const database::Container& container, const std::vector<std::string>& dataset,const std::function<void(const std::map<std::string,std::vector<database::ComparableString>>&)>& lambda)
+void database::TransactionFactory::SelectRawDataSetFrom(const database::Container& container, const std::vector<std::string>& dataset,const std::function<void(const database::impl_dataset_type&)>& lambda)
 {
   container._SelectRawDataSet(dataset,lambda);
 }
 
-void database::TransactionFactory::SelectRawDataSetWithCriteriaFrom(const database::Container& container,const std::map<std::string,std::vector<database::ComparableString>>& filter_criteria,const std::map<std::string,std::vector<database::ComparisonType>>& filter_comparison_params,const std::vector<std::string>& dataset,const std::function<void(const std::map<std::string,std::vector<database::ComparableString>>&)>& lambda)
+void database::TransactionFactory::SelectRawDataSetWithCriteriaFrom(const database::Container& container,const database::impl_filter_type& filter_criteria,const database::impl_filtercompare_type& filter_comparison_params,const std::vector<std::string>& dataset,const std::function<void(const database::impl_dataset_type&)>& lambda)
 {
   container._SelectRawDataSetWithCriteria(filter_criteria,filter_comparison_params,dataset,lambda);
 }
 
-void database::TransactionFactory::Update(database::Container& container,const std::map<std::string,std::vector<database::ComparableString>>& filter_criteria,const std::map<std::string,std::vector<database::ComparisonType>>& filter_comparison_params,const std::map<std::string,database::ComparableString>& new_value)
+void database::TransactionFactory::Update(database::Container& container,const database::impl_filter_type& filter_criteria,const database::impl_filtercompare_type& filter_comparison_params,const database::impl_insert_update_type& new_value)
 {
   container._Update(filter_criteria,filter_comparison_params,new_value);
 }
 
-void database::TransactionFactory::DeleteFrom(database::Container& container,const std::map<std::string,std::vector<database::ComparableString>>& filter_criteria,const std::map<std::string,std::vector<database::ComparisonType>>& filter_comparison_params)
+void database::TransactionFactory::DeleteFrom(database::Container& container,const database::impl_filter_type& filter_criteria,const database::impl_filtercompare_type& filter_comparison_params)
 {
   container._DeleteFrom(filter_criteria,filter_comparison_params);
 }

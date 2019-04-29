@@ -15,7 +15,7 @@ TEST(QueryTests,canDeriveTransactionType)
 
   // database::Query query_alter = "alter container company.employee delete column employee_status";// To Be Adjusted Later
 
-  // database::Query query_delete_from = "delete from company.employee where employee_id = 1";
+  database::Query query_delete_from = "delete from company.employee where employee_id = 1";
   database::Query query_drop_container = "drop container company.employee";
   database::Query query_drop_database = "drop database company";
 
@@ -46,12 +46,12 @@ TEST(QueryTests,canDeriveTransactionType)
   // ASSERT_TRUE(query_alter.transactionType() == database::alter);
   // ASSERT_TRUE(query_alter.transactionMetaType() == database::ddl);
 
-  // ASSERT_TRUE(query_delete_from.transactionType() == database::delete_from);
-  // ASSERT_TRUE(query_delete_from.transactionMetaType() == database::dml);
-  
+  ASSERT_TRUE(query_delete_from.transactionType() == database::delete_from);
+  ASSERT_TRUE(query_delete_from.transactionMetaType() == database::dml);
+
   ASSERT_TRUE(query_drop_container.transactionType() == database::drop_container);
   ASSERT_TRUE(query_drop_container.transactionMetaType() == database::ddl);
-  
+
   ASSERT_TRUE(query_drop_database.transactionType() == database::drop_database);
   ASSERT_TRUE(query_drop_database.transactionMetaType() == database::ddl);
 }
@@ -193,17 +193,29 @@ TEST(QueryTests_Truncate,canDetermineSpecificationForTruncate)
   ASSERT_TRUE(query_truncate.containerName() == "employee");
 }
 
-// TEST(QueryTests_DeleteFrom,canDetermineSpecificationForDeleteFrom)
-// {
-//   database::Query query_delete_from = "delete from company.employee where employee_id = 1";
-//   ASSERT_TRUE(query_delete_from.transactionMetaType() == database::dml);
-//   ASSERT_TRUE(query_delete_from.databaseName() == "company");
-//   ASSERT_TRUE(query_delete_from.containerName() == "employee");
-//   std::map<std::string,std::string> delete_conditions = {
-//     {"employee_id","1"}
-//   };
-//   ASSERT_TRUE(query_delete_from.deleteConditions() == delete_conditions);
-// }
+TEST(QueryTests_DeleteFrom,canDetermineSpecificationForDeleteFrom)
+{
+  database::Query query_delete_from1 = "delete from company.employee where employee_id = 1";
+  ASSERT_TRUE(query_delete_from1.transactionType() == database::delete_from);
+  ASSERT_TRUE(query_delete_from1.transactionMetaType() == database::dml);
+  ASSERT_TRUE(query_delete_from1.databaseName() == "company");
+  ASSERT_TRUE(query_delete_from1.containerName() == "employee");
+  database::api_filter_type filter1 = {
+    {"employee_id",{{"1",database::equal_to}}}
+  };
+  ASSERT_TRUE(query_delete_from1.filter() == filter1);
+
+  database::Query query_delete_from2 = "delete from company.employee where employee_status <> fulltime and employee_join_date >= 20180223 and employee_join_date < 20190212";
+  ASSERT_TRUE(query_delete_from2.transactionType() == database::delete_from);
+  ASSERT_TRUE(query_delete_from2.transactionMetaType() == database::dml);
+  ASSERT_TRUE(query_delete_from2.databaseName() == "company");
+  ASSERT_TRUE(query_delete_from2.containerName() == "employee");
+  database::api_filter_type filter2 = {
+    {"employee_status",{{"fulltime",database::not_equal_to}}},
+    {"employee_join_date",{{"20180223",database::greater_or_equal_to},{"20190212",database::lesser_than}}}
+  };
+  ASSERT_TRUE(query_delete_from2.filter() == filter2);
+}
 
 TEST(QueryTests_DropContainer,canDetermineSpecificationForDropContainer)
 {

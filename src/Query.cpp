@@ -238,52 +238,40 @@ void _ParseTruncateContainerQuery(const std::string& expression,const std::funct
   lambda(databaseName,containerName);
 }
 
-// void _Tran_DeleteFrom_PrefixSeparator_Filter(const std::string& expression,const std::function<void(const std::string& databaseName,const std::string& containerName)>& lambda)
-// {
-//   //e.g. company.employee
-//   std::regex regex("([[:w:]]+).([[:w:]]+)",std::regex_constants::icase);
-//   std::smatch smatch;
-//   if(!std::regex_search(expression,smatch,regex))
-//     throw std::runtime_error("Invalid regular expression provided for extracting transaction parameters");
-//   std::string databaseName = smatch[1].str();
-//   std::string containerName = smatch[2].str();
-//   lambda(databaseName,containerName);
-// }
+void _ParseDeleteFromContainerQuery_ForPrefix(const std::string& expression,const std::function<void(const std::string& databaseName,const std::string& containerName)>& lambda)
+{
+  //e.g. company.employee
+  std::regex regex("([[:w:]]+).([[:w:]]+)",std::regex_constants::icase);
+  std::smatch smatch;
+  if(!std::regex_search(expression,smatch,regex))
+    throw std::runtime_error("Invalid expression provided for extracting transaction parameters");
+  std::string databaseName = smatch[1].str();
+  std::string containerName = smatch[2].str();
+  lambda(databaseName,containerName);
+}
 
-// void _Tran_DeleteFrom_SuffixSeparator_Filter(const std::string& expression,const std::function<void(const std::map<std::string,std::string>&)>& lambda)
-// {
-//   //e.g. employee_id = 1
-//   std::regex regex("([[:w:]]+) = ([[:w:]]+)",std::regex_constants::icase);
-//   std::sregex_iterator pos = {expression.cbegin(),expression.cend(),regex};
-//   std::sregex_iterator end;
-//   std::map<std::string,std::string> conditions;
-//   for(;pos != end; ++pos)
-//     conditions[pos -> str(1)] = pos -> str(2);
-//   lambda(conditions);
-// }
-
-// void _Tran_DeleteFrom_RootSeparator_Filter(const std::string& expression,const std::function<void(const std::string&,const std::string&,const std::map<std::string,std::string>&)>& lambda)
-// {
-//   //e.g. company.employee where employee_id = 1
-//   std::regex regex(".where.",std::regex_constants::icase);
-//   std::smatch smatch;
-//   if(!std::regex_search(expression,smatch,regex))
-//     throw std::runtime_error("Invalid regular expression provided for extracting transaction parameters");
-//   std::string prefixData = smatch.prefix().str();
-//   std::string suffixData = smatch.suffix().str();
+void _ParseDeleteFromContainerQuery(const std::string& expression,const std::function<void(const std::string&,const std::string&,database::api_filter_type&)>& lambda)
+{
+  //e.g. company.employee where employee_id = 1
+  std::regex root_regex(".where.",std::regex_constants::icase);
+  std::smatch root_smatch;
+  if(!std::regex_search(expression,root_smatch,root_regex))
+    throw std::runtime_error("Invalid expression provided for extracting transaction parameters");
+  std::string prefix_string = root_smatch.prefix().str();
+  std::string suffix_string = root_smatch.suffix().str();
   
-//   std::string databaseName;
-//   std::string containerName;
-//   _Tran_DeleteFrom_PrefixSeparator_Filter(prefixData,[&](auto _databaseName,auto _containerName) {
-//     databaseName = _databaseName;
-//     containerName = _containerName;
-//   });
-//   std::map<std::string,std::string> deleteConditions;
-//   _Tran_DeleteFrom_SuffixSeparator_Filter(suffixData,[&](auto conditions) {
-//     deleteConditions = conditions;
-//   });
-//   lambda(databaseName,containerName,deleteConditions);
-// }
+  std::string databaseName;
+  std::string containerName;
+  _ParseDeleteFromContainerQuery_ForPrefix(prefix_string,[&](auto _databaseName,auto _containerName) {
+    databaseName = _databaseName;
+    containerName = _containerName;
+  });
+  database::api_filter_type filter;
+  _FilterParser(suffix_string,[&](auto _filter) {
+    filter = _filter;
+  });
+  lambda(databaseName,containerName,filter);
+}
 
 void _ParseDropContainerQuery(const std::string& expression,const std::function<void(const std::string& databaseName,const std::string& containerName)>& lambda)
 {
@@ -412,15 +400,15 @@ void database::Query::_ParseQueryString()
 
 
   //Delete from Container
-  // else if(m_transaction_type == database::delete_from)
-  // {
-  //   m_transaction_metatype = database::dml;
-  //   _Tran_DeleteFrom_RootSeparator_Filter(first_order_filter_result.second,[&](auto _databaseName,auto _containerName,auto _deleteConditions) {
-  //     m_database_name = _databaseName;
-  //     m_container_name = _containerName;
-  //     m_delete_conditions = _deleteConditions;
-  //   });
-  // }
+  else if(m_transaction_type == database::delete_from)
+  {
+    m_transaction_metatype = database::dml;
+    _ParseDeleteFromContainerQuery(first_order_filter_result.second,[&](auto databaseName,auto containerName,auto filter) {
+      m_database_name = databaseName;
+      m_container_name = containerName;
+      m_filter = filter;
+    });
+  }
 
   //Drop Container
   else if(m_transaction_type == database::drop_container)

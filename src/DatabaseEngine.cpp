@@ -25,6 +25,7 @@ database::impl_schema_type PrepareSchema(const database::api_schema_type& raw_sc
       case database::integer: schema[pair.first] = database::DataType::quantifiable; break;
       case database::string: schema[pair.first] = database::DataType::non_quantifiable; break;
       case database::boolean: schema[pair.first] = database::DataType::non_quantifiable; break;
+      case database::date: schema[pair.first] = database::non_quantifiable; break;
       default: break;
     }
   });
@@ -160,7 +161,7 @@ void database::DatabaseEngine::ExecuteForDataDefinition(const database::Query& q
       CreateDatabase(query.databaseName(),completion);
       break;
     case database::create_container:
-      CreateContainer(query.databaseName(),query.containerName(),query.containerSchema(),completion);
+      CreateContainer(query.databaseName(),query.containerName(),query.schema(),completion);
       break;
     // case database::alter:
     //   #pragma mark TODO
@@ -183,17 +184,19 @@ void database::DatabaseEngine::ExecuteForDataManipulation(const database::Query&
   switch (query.transactionType())
   {
     case database::insert_into:
-      InsertIntoContainer(query.databaseName(),query.containerName(),query.insertDataset(),result);
+      InsertIntoContainer(query.databaseName(),query.containerName(),query.values(),result);
       break;
     case database::select_all:
-      SelectAllFromContainer(query.databaseName(),query.containerName(),result);
+      if(query.filter().empty())
+        SelectAllFromContainer(query.databaseName(),query.containerName(),result);
+      else
+        SelectRawDataSetFromContainerWithCriteria(query.databaseName(),query.containerName(),query.filter(),{},result);
       break;
     case database::select_dataset:
-      if(query.selectConditions().empty())
-        SelectRawDataSetFromContainer(query.databaseName(),query.containerName(),query.selectDataset(),result);
+      if(query.filter().empty())
+        SelectRawDataSetFromContainer(query.databaseName(),query.containerName(),query.dataset(),result);
       else
-        #pragma mark Implement this
-        exit(EXIT_FAILURE);
+        SelectRawDataSetFromContainerWithCriteria(query.databaseName(),query.containerName(),query.filter(),query.dataset(),result);
       break;
     case database::update:
       #pragma mark TODO

@@ -21,13 +21,13 @@ void _Process_For_Regex(const std::string& expression,const std::regex& regex,co
     if(filter.find(pos -> str(1)) != filter.end())
       filter[pos -> str(1)].emplace_back(pair);
     else
-      filter[pos -> str(1)] = {pair};  
+      filter[pos -> str(1)] = {pair};
   }
 }
 
 void _FilterParser(const std::string& expression,const std::function<void(const database::api_filter_type&)>& lambda)
 {
-  //e.g. employee_status = fulltime and employee_joiningdatae >= 20170823 
+  //e.g. employee_status = fulltime and employee_joiningdatae >= 20170823
   std::regex regex_equal_to("([[:w:]]+) = ([[:w:]]+)",std::regex_constants::icase);
   std::regex regex_not_equal_to("([[:w:]]+) <> ([[:w:]]+)",std::regex_constants::icase);
   std::regex regex_greater_or_equal_to("([[:w:]]+) >= ([[:w:]]+)",std::regex_constants::icase);
@@ -41,7 +41,7 @@ void _FilterParser(const std::string& expression,const std::function<void(const 
   database::api_filter_type filter;
   if(std::regex_search(expression,regex_equal_to))
     _Process_For_Regex(expression,regex_equal_to,database::equal_to,filter);
-  
+
   if(std::regex_search(expression,regex_not_equal_to))
     _Process_For_Regex(expression,regex_not_equal_to,database::not_equal_to,filter);
 
@@ -70,7 +70,7 @@ void _ParseCreateContainerQuery(const std::string& expression,const std::functio
   std::string databaseName = root_smatch[1].str();
   std::string containerName = root_smatch[2].str();
   std::string schemaDetail = root_smatch.suffix().str();
-  
+
   //e.g. (employee_id int,employee_name string,employee_status string)
   std::regex schema_regex("([[:w:]]+) ([[:w:]]+)",std::regex_constants::icase);
   std::smatch schema_smatch;
@@ -84,9 +84,10 @@ void _ParseCreateContainerQuery(const std::string& expression,const std::functio
 
   database::api_schema_type refined_schema;
   std::for_each(containerSchema.begin(),containerSchema.end(),[&](auto pair){
-    if(pair.second == "integer") refined_schema[pair.first] = database::QueryDataType::integer;
-    else if(pair.second == "string") refined_schema[pair.first] = database::QueryDataType::string;
-    else if(pair.second == "boolean") refined_schema[pair.first] = database::QueryDataType::boolean;
+    if(pair.second == "integer") refined_schema[pair.first] = database::integer;
+    else if(pair.second == "string") refined_schema[pair.first] = database::string;
+    else if(pair.second == "boolean") refined_schema[pair.first] = database::boolean;
+    else if(pair.second == "date") refined_schema[pair.first] = database::date;
     else throw std::runtime_error("Undefined datatypes is used for schema");
   });
   lambda(databaseName,containerName,refined_schema);
@@ -102,7 +103,7 @@ void _ParseInsertIntoContainerQuery(const std::string& expression,const std::fun
   std::string databaseName = root_smatch[1].str();
   std::string containerName = root_smatch[2].str();
   std::string values_dataset = root_smatch.suffix().str();
-  
+
   //e.g. (employee_id:1,employee_name:chandan,employee_status:full_time)
   std::regex values_regex("([[:w:]]+):([[:w:]]+)",std::regex_constants::icase);
   std::smatch values_smatch;
@@ -116,16 +117,29 @@ void _ParseInsertIntoContainerQuery(const std::string& expression,const std::fun
   lambda(databaseName,containerName,values);
 }
 
-void _ParseSelectAllFromContainerQuery(const std::string& expression,const std::function<void(const std::string& databaseName,const std::string& containerName)>& lambda)
+void _ParseSelectAllFromContainerQuery(const std::string& expression,const std::function<void(const std::string& databaseName,const std::string& containerName,const database::api_filter_type&)>& lambda)
 {
   //from companye.employee
   std::regex root_regex("from ([[:w:]]+).([[:w:]]+)",std::regex_constants::icase);
+  std::regex root_regex_with_filter("from ([[:w:]]+).([[:w:]]+) where ",std::regex_constants::icase);
   std::smatch root_smatch;
-  if(!std::regex_search(expression,root_smatch,root_regex))
+  if(std::regex_search(expression,root_smatch,root_regex_with_filter))
+  {
+    std::string databaseName = root_smatch[1].str();
+    std::string containerName = root_smatch[2].str();
+    std::string filter_string = root_smatch.suffix().str();
+    database::api_filter_type filter;
+    _FilterParser(filter_string,[&](auto _filter) {
+      filter = _filter;
+    });
+    lambda(databaseName,containerName,filter);
+  }else if(std::regex_search(expression,root_smatch,root_regex))
+  {
+    std::string databaseName = root_smatch[1].str();
+    std::string containerName = root_smatch[2].str();
+    lambda(databaseName,containerName,{});
+  }else
     throw std::runtime_error("Invalid regular expression provided for extracting transaction parameters");
-  std::string databaseName = root_smatch[1].str();
-  std::string containerName = root_smatch[2].str();
-  lambda(databaseName,containerName);
 }
 
 void _ParseSelectDataSetFromContainerQuery_ForData(const std::string& expression,const std::function<void(const std::vector<std::string>&)>& lambda)
@@ -211,7 +225,7 @@ void _ParseUpdateContainerQuery(const std::string& expression,const std::functio
   std::string databaseName = root_smatch[1].str();
   std::string containerName = root_smatch[2].str();
   std::string remainder_part = root_smatch.suffix().str();
-  
+
   database::api_insert_update_type values;
   database::api_filter_type filter;
   _ParseUpdateContainerQuery_Separator(remainder_part,[&](auto new_data_part,auto filter_part){
@@ -259,7 +273,7 @@ void _ParseDeleteFromContainerQuery(const std::string& expression,const std::fun
     throw std::runtime_error("Invalid expression provided for extracting transaction parameters");
   std::string prefix_string = root_smatch.prefix().str();
   std::string suffix_string = root_smatch.suffix().str();
-  
+
   std::string databaseName;
   std::string containerName;
   _ParseDeleteFromContainerQuery_ForPrefix(prefix_string,[&](auto _databaseName,auto _containerName) {
@@ -352,9 +366,10 @@ void database::Query::_ParseQueryString()
   else if(m_transaction_type == database::select_all)
   {
     m_transaction_metatype = database::dml;
-    _ParseSelectAllFromContainerQuery(first_order_filter_result.second,[&](auto databaseName, auto containerName){
+    _ParseSelectAllFromContainerQuery(first_order_filter_result.second,[&](auto databaseName, auto containerName, auto filter){
       m_database_name = databaseName;
       m_container_name = containerName;
+      m_filter = filter;
     });
   }
 

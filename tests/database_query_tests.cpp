@@ -8,6 +8,7 @@ TEST(QueryTests,canDeriveTransactionType)
   database::Query query_create_container = "create container company.employee(employee_id integer,employee_name string,employee_status string)";
   database::Query query_insert_into = "insert into company.employee values(employee_id:1,employee_name:chandan,employee_status:fulltime)";
   database::Query query_select_all = "select * from company.employee";
+  database::Query query_select_all_with_criteria = "select * from company.employee where employee_status = parttime";
   database::Query query_select_dataset = "select employee_id,employee_name from company.employee";
   database::Query query_select_dataset_with_criteria = "select employee_id,employee_name from company.employee where employee_id = 1";
   database::Query query_update = "update company.employee set employee_status = fulltime where employee_id = 1";
@@ -30,6 +31,9 @@ TEST(QueryTests,canDeriveTransactionType)
 
   ASSERT_TRUE(query_select_all.transactionType() == database::select_all);
   ASSERT_TRUE(query_select_all.transactionMetaType() == database::dml);
+
+  ASSERT_TRUE(query_select_all_with_criteria.transactionType() == database::select_all);
+  ASSERT_TRUE(query_select_all_with_criteria.transactionMetaType() == database::dml);
 
   ASSERT_TRUE(query_select_dataset.transactionType() == database::select_dataset);
   ASSERT_TRUE(query_select_dataset.transactionMetaType() == database::dml);
@@ -97,6 +101,19 @@ TEST(QueryTests_SelectAll,canDetermineSpecificationForSelectAll)
   ASSERT_TRUE(query_select_all.transactionMetaType() == database::dml);
   ASSERT_TRUE(query_select_all.databaseName() == "company");
   ASSERT_TRUE(query_select_all.containerName() == "employee");
+}
+
+TEST(QueryTests_SelectAll_WithCriteria,canDetermineSpecificationForSelectAllWithCriteria)
+{
+  database::Query query_select_all_with_criteria = "select * from company.employee where employee_status <> parttime";
+  ASSERT_TRUE(query_select_all_with_criteria.transactionType() == database::select_all);
+  ASSERT_TRUE(query_select_all_with_criteria.transactionMetaType() == database::dml);
+  ASSERT_TRUE(query_select_all_with_criteria.databaseName() == "company");
+  ASSERT_TRUE(query_select_all_with_criteria.containerName() == "employee");
+  database::api_filter_type filter = {
+    {"employee_status",{{"parttime",database::not_equal_to}}}
+  };
+  ASSERT_TRUE(query_select_all_with_criteria.filter() == filter);
 }
 
 TEST(QueryTests_SelectDataSet,canDetermineSpecificationForSelectDataSet)

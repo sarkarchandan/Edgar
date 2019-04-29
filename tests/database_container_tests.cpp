@@ -121,7 +121,7 @@ TEST(ContainerTests,canStoreAndRetrieveDataBasedOnSingleCriterion)
     {"p_name",{(std::string)"John",(std::string)"Tim",(std::string)"Steve",(std::string)"Mark",(std::string)"Sam"}}
   };
   database::TransactionFactory::SelectRawDataSetWithCriteriaFrom(container,
-    {{"p_country",{std::make_pair<database::ComparableString,database::ComparisonType>((std::string)"DE",database::not_eqaul_to)}}},
+    {{"p_country",{std::make_pair<database::ComparableString,database::ComparisonType>((std::string)"DE",database::not_equal_to)}}},
     {},[&](auto query_result) {
     ASSERT_TRUE(query_result == expected_result2);
   });

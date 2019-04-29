@@ -52,7 +52,8 @@ namespace database
   {
     integer,
     string,
-    boolean
+    boolean,
+    date
   };
 
   enum DataType

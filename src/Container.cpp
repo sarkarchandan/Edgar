@@ -130,11 +130,11 @@ void database::Container::_SelectRawDataSetWithCriteria(const database::impl_fil
 
     //This is the index of the column on which filtering must be applied
     std::size_t filter_column_index = std::distance(m_schema.begin(),m_schema.find(filter_column));
-
+    
     //Iterating over each pair of corresponding value respective compare_type provided in the given criteria
     _for_each_comparison(comparison_params,[&](auto value,auto compare) {
       auto column = m_data -> operator[](filter_column_index);
-
+      
       //Iterating over each value in the given column to check if the filter criterion is satisfied O(n^3)
       for(std::size_t i = 0; i < column.size(); i += 1)
       {

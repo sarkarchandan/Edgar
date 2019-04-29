@@ -226,17 +226,17 @@ void _ParseUpdateContainerQuery(const std::string& expression,const std::functio
 }
 
 
-// void _Tran_Truncate_Root_Filter(const std::string& expression,const std::function<void(const std::string& databaseName,const std::string& containerName)>& lambda)
-// {
-//   //e.g. company.employee
-//   std::regex regex("([[:w:]]+).([[:w:]]+)",std::regex_constants::icase);
-//   std::smatch smatch;
-//   if(!std::regex_search(expression,smatch,regex))
-//     throw std::runtime_error("Invalid regular expression provided for extracting transaction parameters");
-//   std::string databaseName = smatch[1].str();
-//   std::string containerName = smatch[2].str();
-//   lambda(databaseName,containerName);
-// }
+void _ParseTruncateContainerQuery(const std::string& expression,const std::function<void(const std::string& databaseName,const std::string& containerName)>& lambda)
+{
+  //e.g. company.employee
+  std::regex root_regex("([[:w:]]+).([[:w:]]+)",std::regex_constants::icase);
+  std::smatch root_smatch;
+  if(!std::regex_search(expression,root_smatch,root_regex))
+    throw std::runtime_error("Invalid expression provided for extracting transaction parameters");
+  std::string databaseName = root_smatch[1].str();
+  std::string containerName = root_smatch[2].str();
+  lambda(databaseName,containerName);
+}
 
 // void _Tran_DeleteFrom_PrefixSeparator_Filter(const std::string& expression,const std::function<void(const std::string& databaseName,const std::string& containerName)>& lambda)
 // {
@@ -394,20 +394,24 @@ void database::Query::_ParseQueryString()
     });
   }
 
+  //Truncate Container
+  else if(m_transaction_type == database::truncate)
+  {
+    m_transaction_metatype = database::dml;
+    _ParseTruncateContainerQuery(first_order_filter_result.second,[&](auto databaseName,auto containerName){
+      m_database_name = databaseName;
+      m_container_name = containerName;
+    });
+  }
 
-  // else if(m_transaction_type == database::truncate)
-  // {
-  //   m_transaction_metatype = database::dml;
-  //   _Tran_Truncate_Root_Filter(first_order_filter_result.second,[&](auto _databaseName,auto _containerName){
-  //     m_database_name = _databaseName;
-  //     m_container_name = _containerName;
-  //   });
-  // }
+  //Alter Container - To Be Adjusted Later
   // else if(m_transaction_type == database::alter)
   // {
   //   m_transaction_metatype = database::ddl;
-
   // }
+
+  
+  //Delete from Container
   // else if(m_transaction_type == database::delete_from)
   // {
   //   m_transaction_metatype = database::dml;

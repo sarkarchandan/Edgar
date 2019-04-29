@@ -11,7 +11,7 @@ TEST(QueryTests,canDeriveTransactionType)
   database::Query query_select_dataset = "select employee_id,employee_name from company.employee";
   database::Query query_select_dataset_with_criteria = "select employee_id,employee_name from company.employee where employee_id = 1";
   database::Query query_update = "update company.employee set employee_status = fulltime where employee_id = 1";
-  // database::Query query_truncate = "truncate container company.employee";
+  database::Query query_truncate = "truncate container company.employee";
   // database::Query query_alter = "alter container company.employee delete column employee_status";
   // database::Query query_delete_from = "delete from company.employee where employee_id = 1";
   // database::Query query_drop_container = "drop container company.employee";
@@ -38,8 +38,8 @@ TEST(QueryTests,canDeriveTransactionType)
   ASSERT_TRUE(query_update.transactionType() == database::update);
   ASSERT_TRUE(query_update.transactionMetaType() == database::dml);
 
-  // ASSERT_TRUE(query_truncate.transactionType() == database::truncate);
-  // ASSERT_TRUE(query_truncate.transactionMetaType() == database::dml);
+  ASSERT_TRUE(query_truncate.transactionType() == database::truncate);
+  ASSERT_TRUE(query_truncate.transactionMetaType() == database::dml);
 
   // ASSERT_TRUE(query_alter.transactionType() == database::alter);
   // ASSERT_TRUE(query_alter.transactionMetaType() == database::ddl);
@@ -183,14 +183,14 @@ TEST(QueryTests_Update,canDetermineSpecificationForUpdate)
   ASSERT_TRUE(query_update2.filter() == filter2);
 }
 
-// TEST(QueryTests_Truncate,canDetermineSpecificationForTruncate)
-// {
-//   database::Query query_truncate = "truncate container company.employee";
-//   ASSERT_TRUE(query_truncate.transactionMetaType() == database::dml);
-//   ASSERT_TRUE(query_truncate.databaseName() == "company");
-//   ASSERT_TRUE(query_truncate.containerName() == "employee");
-// }
-//
+TEST(QueryTests_Truncate,canDetermineSpecificationForTruncate)
+{
+  database::Query query_truncate = "truncate container company.employee";
+  ASSERT_TRUE(query_truncate.transactionMetaType() == database::dml);
+  ASSERT_TRUE(query_truncate.databaseName() == "company");
+  ASSERT_TRUE(query_truncate.containerName() == "employee");
+}
+
 // TEST(QueryTests_DeleteFrom,canDetermineSpecificationForDeleteFrom)
 // {
 //   database::Query query_delete_from = "delete from company.employee where employee_id = 1";

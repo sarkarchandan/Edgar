@@ -12,10 +12,12 @@ TEST(QueryTests,canDeriveTransactionType)
   database::Query query_select_dataset_with_criteria = "select employee_id,employee_name from company.employee where employee_id = 1";
   database::Query query_update = "update company.employee set employee_status = fulltime where employee_id = 1";
   database::Query query_truncate = "truncate container company.employee";
-  // database::Query query_alter = "alter container company.employee delete column employee_status";
+
+  // database::Query query_alter = "alter container company.employee delete column employee_status";// To Be Adjusted Later
+
   // database::Query query_delete_from = "delete from company.employee where employee_id = 1";
-  // database::Query query_drop_container = "drop container company.employee";
-  // database::Query query_drop_database = "drop database company";
+  database::Query query_drop_container = "drop container company.employee";
+  database::Query query_drop_database = "drop database company";
 
   ASSERT_TRUE(query_create_database.transactionType() == database::create_database);
   ASSERT_TRUE(query_create_database.transactionMetaType() == database::ddl);
@@ -46,12 +48,12 @@ TEST(QueryTests,canDeriveTransactionType)
 
   // ASSERT_TRUE(query_delete_from.transactionType() == database::delete_from);
   // ASSERT_TRUE(query_delete_from.transactionMetaType() == database::dml);
-  //
-  // ASSERT_TRUE(query_drop_container.transactionType() == database::drop_container);
-  // ASSERT_TRUE(query_drop_container.transactionMetaType() == database::ddl);
-  //
-  // ASSERT_TRUE(query_drop_database.transactionType() == database::drop_database);
-  // ASSERT_TRUE(query_drop_database.transactionMetaType() == database::ddl);
+  
+  ASSERT_TRUE(query_drop_container.transactionType() == database::drop_container);
+  ASSERT_TRUE(query_drop_container.transactionMetaType() == database::ddl);
+  
+  ASSERT_TRUE(query_drop_database.transactionType() == database::drop_database);
+  ASSERT_TRUE(query_drop_database.transactionMetaType() == database::ddl);
 }
 
 TEST(QueryTests_CreateDatabase,canDetermineSpecificationForCreateDatabase)
@@ -202,18 +204,18 @@ TEST(QueryTests_Truncate,canDetermineSpecificationForTruncate)
 //   };
 //   ASSERT_TRUE(query_delete_from.deleteConditions() == delete_conditions);
 // }
-//
-// TEST(QueryTests_DropContainer,canDetermineSpecificationForDropContainer)
-// {
-//   database::Query query_drop_container = "drop container company.employee";
-//   ASSERT_TRUE(query_drop_container.transactionMetaType() == database::ddl);
-//   ASSERT_TRUE(query_drop_container.databaseName() == "company");
-//   ASSERT_TRUE(query_drop_container.containerName() == "employee");
-// }
-//
-// TEST(QueryTests_DropDatabase,canDetermineSpecificationForDropDatabase)
-// {
-//   database::Query query_drop_database = "drop database company";
-//   ASSERT_TRUE(query_drop_database.transactionMetaType() == database::ddl);
-//   ASSERT_TRUE(query_drop_database.databaseName() == "company");
-// }
+
+TEST(QueryTests_DropContainer,canDetermineSpecificationForDropContainer)
+{
+  database::Query query_drop_container = "drop container company.employee";
+  ASSERT_TRUE(query_drop_container.transactionMetaType() == database::ddl);
+  ASSERT_TRUE(query_drop_container.databaseName() == "company");
+  ASSERT_TRUE(query_drop_container.containerName() == "employee");
+}
+
+TEST(QueryTests_DropDatabase,canDetermineSpecificationForDropDatabase)
+{
+  database::Query query_drop_database = "drop database company";
+  ASSERT_TRUE(query_drop_database.transactionMetaType() == database::ddl);
+  ASSERT_TRUE(query_drop_database.databaseName() == "company");
+}

@@ -285,17 +285,17 @@ void _ParseTruncateContainerQuery(const std::string& expression,const std::funct
 //   lambda(databaseName,containerName,deleteConditions);
 // }
 
-// void _Tran_DropContainer_PrefixSeparator_Filter(const std::string& expression,const std::function<void(const std::string& databaseName,const std::string& containerName)>& lambda)
-// {
-//   //e.g. company.employee
-//   std::regex regex("([[:w:]]+).([[:w:]]+)",std::regex_constants::icase);
-//   std::smatch smatch;
-//   if(!std::regex_search(expression,smatch,regex))
-//     throw std::runtime_error("Invalid regular expression provided for extracting transaction parameters");
-//   std::string databaseName = smatch[1].str();
-//   std::string containerName = smatch[2].str();
-//   lambda(databaseName,containerName);
-// }
+void _ParseDropContainerQuery(const std::string& expression,const std::function<void(const std::string& databaseName,const std::string& containerName)>& lambda)
+{
+  //e.g. company.employee
+  std::regex root_regex("([[:w:]]+).([[:w:]]+)",std::regex_constants::icase);
+  std::smatch root_smatch;
+  if(!std::regex_search(expression,root_smatch,root_regex))
+    throw std::runtime_error("Invalid regular expression provided for extracting transaction parameters");
+  std::string databaseName = root_smatch[1].str();
+  std::string containerName = root_smatch[2].str();
+  lambda(databaseName,containerName);
+}
 
 std::pair<database::TransactionType,std::string> _Transaction_Filter(const std::string& expression)
 {
@@ -410,7 +410,7 @@ void database::Query::_ParseQueryString()
   //   m_transaction_metatype = database::ddl;
   // }
 
-  
+
   //Delete from Container
   // else if(m_transaction_type == database::delete_from)
   // {
@@ -421,17 +421,21 @@ void database::Query::_ParseQueryString()
   //     m_delete_conditions = _deleteConditions;
   //   });
   // }
-  // else if(m_transaction_type == database::drop_container)
-  // {
-  //   m_transaction_metatype = database::ddl;
-  //   _Tran_DropContainer_PrefixSeparator_Filter(first_order_filter_result.second,[&](auto _databaseName, auto _containerName){
-  //     m_database_name = _databaseName;
-  //     m_container_name = _containerName;
-  //   });
-  // }
-  // else if(m_transaction_type == database::drop_database)
-  // {
-  //   m_transaction_metatype = database::ddl;
-  //   m_database_name = first_order_filter_result.second;
-  // }
+
+  //Drop Container
+  else if(m_transaction_type == database::drop_container)
+  {
+    m_transaction_metatype = database::ddl;
+    _ParseDropContainerQuery(first_order_filter_result.second,[&](auto databaseName, auto containerName){
+      m_database_name = databaseName;
+      m_container_name = containerName;
+    });
+  }
+
+  //Drop Database
+  else if(m_transaction_type == database::drop_database)
+  {
+    m_transaction_metatype = database::ddl;
+    m_database_name = first_order_filter_result.second;
+  }
 }

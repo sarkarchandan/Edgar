@@ -45,6 +45,7 @@ TEST(DatabaseEngineTests,canInsertDataIntoContainer)
       {"employee_name",{"chandan"}},
       {"employee_status",{"fulltime"}}
     };
+    std::cout << "Result set for inserted record: " << "\n" << query_result << "\n";
     ASSERT_TRUE(query_result == expected_result);
   });
 }
@@ -55,10 +56,10 @@ TEST(DatabaseEngineTests,canSelectAllDataFromContainer)
   database::Query query_create_database = "create database company";
   database::Query query_create_container = "create container company.employee(employee_id integer,employee_name string,employee_status string)";
   std::vector<database::Query> insert_queries = {
-    "insert into company.employee values(employee_id:1,employee_name:Dominik_Oeh,employee_status:fulltime)",
-    "insert into company.employee values(employee_id:2,employee_name:Heinrich_Graser,employee_status:parttime)",
-    "insert into company.employee values(employee_id:3,employee_name:Mathias_Renner,employee_status:parttime)",
-    "insert into company.employee values(employee_id:4,employee_name:Marcus_Kalb,employee_status:fulltime)"
+    "insert into company.employee values(employee_id:1,employee_name:Dominik_Schmidt,employee_status:fulltime)",
+    "insert into company.employee values(employee_id:2,employee_name:Mathias_Heinrich,employee_status:parttime)",
+    "insert into company.employee values(employee_id:3,employee_name:Andreas_Renner,employee_status:parttime)",
+    "insert into company.employee values(employee_id:4,employee_name:Marcus_Kaiser,employee_status:fulltime)"
   };
 
   database_engine.ExecuteForDataDefinition(query_create_database,[&](auto database_created){
@@ -75,7 +76,7 @@ TEST(DatabaseEngineTests,canSelectAllDataFromContainer)
   database_engine.ExecuteForDataManipulation(query_select_all,[&](auto query_result) {
     std::map<std::string,std::vector<std::string>> expected_result = {
       {"employee_id",{"1","2","3","4"}},
-      {"employee_name",{"Dominik_Oeh","Heinrich_Graser","Mathias_Renner","Marcus_Kalb"}},
+      {"employee_name",{"Dominik_Schmidt","Mathias_Heinrich","Andreas_Renner","Marcus_Kaiser"}},
       {"employee_status",{"fulltime","parttime","parttime","fulltime"}}
     };
     std::cout << "Result Set for all records: " << "\n" << query_result << "\n";

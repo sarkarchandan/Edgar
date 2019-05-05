@@ -118,19 +118,20 @@ $ ctest
 //DatabaseEngine accepts data definition and data manipulation queries
 database::DatabaseEngine database_engine;
 
-//Create a Database
+
+/** Create a Database **/
 database::Query query_create_database = "create database company";
 database_engine.ExecuteForDataDefinition(query_create_database,[&](bool database_created){
     ASSERT_TRUE(database_created);
 });
 
-//Create a Container
+/** Create a Container **/
 database::Query query_create_container = "create container company.employee(employee_id integer,employee_name string,employee_status string)";
 database_engine.ExecuteForDataDefinition(query_create_container,[&](auto container_created) {
     ASSERT_TRUE(container_created);
 });
 
-//Insert data into Container
+/** Insert data into Container **/
 database::Query query_insert_into = "insert into company.employee values(employee_id:1,employee_name:chandan,employee_status:fulltime)";
 database_engine.ExecuteForDataManipulation(query_insert_into,[&](auto query_result) {
 
@@ -144,7 +145,7 @@ employee_status	{fulltime}
 
 });
 
-//Inserting a set of records to the Container and fetch all
+/** Inserting a set of records to the Container and fetch all **/
 std::vector<database::Query> insert_queries = {
     "insert into company.employee values(employee_id:1,employee_name:Dominik_Schmidt,employee_status:fulltime)",
     "insert into company.employee values(employee_id:2,employee_name:Mathias_Heinrich,employee_status:parttime)",
@@ -169,7 +170,7 @@ employee_status	{fulltime parttime parttime fulltime}
 
 });
 
-//Select a dataset by column names
+/** Select a dataset by column names **/
 database::Query query_create_database = "create database company";
 database::Query query_create_container = "create container company.employee(employee_id integer,employee_name string,employee_status string)";
 std::vector<database::Query> insert_queries = {
@@ -198,7 +199,7 @@ employee_name	{Dominik_Schimdt Heinrich_Keil Mathias_Rheinlein Marcus_Eisermann}
 
 });
 
-//Select records by a single criterion
+/** Select records by a single criterion **/
 database::Query query_create_database = "create database university";
 database::Query query_create_container = "create container university.student (student_id integer,student_name string,student_dob string,student_gender string";
 std::vector<database::Query> insert_queries = {

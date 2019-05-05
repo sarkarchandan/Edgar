@@ -141,6 +141,7 @@ employee_id	{1}
 employee_name	{chandan}
 employee_status	{fulltime}
 */
+
 });
 
 //Inserting a set of records to the Container and fetch all
@@ -165,6 +166,7 @@ employee_id	{1 2 3 4}
 employee_name	{Dominik_Schmidt Mathias_Heinrich Andreas_Renner Marcus_Kaiser}
 employee_status	{fulltime parttime parttime fulltime}
 */
+
 });
 
 //Select a dataset by column names
@@ -189,8 +191,10 @@ database_engine.ExecuteForDataManipulation(query_select_dataset1,[&](auto query_
 
 //Result set for the select query, which has the type std::map<std::string,std::vector<std::string>>
 
+/*
 employee_id	{1 2 3 4}
 employee_name	{Dominik_Schimdt Heinrich_Keil Mathias_Rheinlein Marcus_Eisermann}
+*/
 
 });
 
@@ -221,10 +225,12 @@ database_engine.ExecuteForDataManipulation(select_query1,[&](auto query_result) 
 
 //Result set for the select query, which has the type std::map<std::string,std::vector<std::string>>
 
+/*
 student_dob	{19871112 19930611 19951201 19890401}
 student_gender	{female female female female}
 student_id	{2 5 6 7}
 student_name	{Ulrike_Von_Stryk Kerstin_Peh Tanja_Schimdt Anna_Graser}
+*/
 
 });
 

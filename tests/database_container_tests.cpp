@@ -1,6 +1,7 @@
 #include "gtest/gtest.h"
 #include "TransactionFactory.hpp"
 #include "Date.hpp"
+#include "Utility.hpp"
 
 TEST(ContainerTests,canInitializeContainer)
 {
@@ -104,35 +105,39 @@ TEST(ContainerTests,canStoreAndRetrieveDataBasedOnSingleCriterion)
   database::TransactionFactory::InsertInto(container,value8);
   database::TransactionFactory::InsertInto(container,value9);
 
-  std::map<std::string,std::vector<database::ComparableString>> expected_result1 = {
-    {"p_country",{(std::string)"DE",(std::string)"DE",(std::string)"DE",(std::string)"DE",(std::string)"NZ",(std::string)"NZ"}},
-    {"p_id",{(std::string)"p3",(std::string)"p4",(std::string)"p5",(std::string)"p6",(std::string)"p7",(std::string)"p9"}},
-    {"p_name",{(std::string)"Ulrike",(std::string)"Heinrich",(std::string)"Dominik",(std::string)"Mathias",(std::string)"Steve",(std::string)"Sam"}}
-  };
+  
   database::TransactionFactory::SelectRawDataSetWithCriteriaFrom(container,
     {{"p_country",{std::make_pair<database::ComparableString,database::ComparisonType>((std::string)"DE",database::ComparisonType::equal_to),std::make_pair<database::ComparableString,database::ComparisonType>((std::string)"NZ",database::equal_to)}}},
     {},[&](auto query_result){
+    
+    std::map<std::string,std::vector<database::ComparableString>> expected_result1 = {
+      {"p_country",{(std::string)"DE",(std::string)"DE",(std::string)"DE",(std::string)"DE",(std::string)"NZ",(std::string)"NZ"}},
+      {"p_id",{(std::string)"p3",(std::string)"p4",(std::string)"p5",(std::string)"p6",(std::string)"p7",(std::string)"p9"}},
+      {"p_name",{(std::string)"Ulrike",(std::string)"Heinrich",(std::string)"Dominik",(std::string)"Mathias",(std::string)"Steve",(std::string)"Sam"}}
+    };
     ASSERT_TRUE(query_result == expected_result1);
   });
 
-  std::map<std::string,std::vector<database::ComparableString>> expected_result2 = {
-    {"p_country",{(std::string)"US",(std::string)"US",(std::string)"NZ",(std::string)"AU",(std::string)"NZ"}},
-    {"p_id",{(std::string)"p1",(std::string)"p2",(std::string)"p7",(std::string)"p8",(std::string)"p9"}},
-    {"p_name",{(std::string)"John",(std::string)"Tim",(std::string)"Steve",(std::string)"Mark",(std::string)"Sam"}}
-  };
   database::TransactionFactory::SelectRawDataSetWithCriteriaFrom(container,
     {{"p_country",{std::make_pair<database::ComparableString,database::ComparisonType>((std::string)"DE",database::not_equal_to)}}},
     {},[&](auto query_result) {
+
+    std::map<std::string,std::vector<database::ComparableString>> expected_result2 = {
+      {"p_country",{(std::string)"US",(std::string)"US",(std::string)"NZ",(std::string)"AU",(std::string)"NZ"}},
+      {"p_id",{(std::string)"p1",(std::string)"p2",(std::string)"p7",(std::string)"p8",(std::string)"p9"}},
+      {"p_name",{(std::string)"John",(std::string)"Tim",(std::string)"Steve",(std::string)"Mark",(std::string)"Sam"}}
+    };
     ASSERT_TRUE(query_result == expected_result2);
   });
 
-  std::map<std::string,std::vector<database::ComparableString>> expected_result3 = {
-    {"p_id",{(std::string)"p1",(std::string)"p2",(std::string)"p8"}},
-    {"p_name",{(std::string)"John",(std::string)"Tim",(std::string)"Mark"}}
-  };
   database::TransactionFactory::SelectRawDataSetWithCriteriaFrom(container,
     {{"p_country",{std::make_pair<database::ComparableString,database::ComparisonType>((std::string)"US",database::equal_to),std::make_pair<database::ComparableString,database::ComparisonType>((std::string)"AU",database::equal_to)}}},
     {"p_id","p_name"},[&](auto query_result) {
+    
+    std::map<std::string,std::vector<database::ComparableString>> expected_result3 = {
+      {"p_id",{(std::string)"p1",(std::string)"p2",(std::string)"p8"}},
+      {"p_name",{(std::string)"John",(std::string)"Tim",(std::string)"Mark"}}
+    };
     ASSERT_TRUE(query_result == expected_result3);
   });
 

@@ -158,13 +158,6 @@ TEST(DatabaseEngineTests,canSelectDatasetFromContainerWithCriteria)
   });
 
   database::Query select_query1 = "select * from university.student where student_gender = female";
-  database::Query select_query2 = "select student_id,student_name from university.student where student_dob > 19840310 and student_dob < 19930611";
-
-  database::api_filter_type filter2 = {
-    {"student_dob",{{"19840310",database::greater_than},{"19930611",database::lesser_than}}}
-  };
-  ASSERT_TRUE(select_query2.transactionType() == database::select_dataset);
-  ASSERT_TRUE(select_query2.filter() == filter2);
 
   database_engine.ExecuteForDataManipulation(select_query1,[&](auto query_result) {
     database::api_dataset_type expected_result = {
@@ -173,18 +166,23 @@ TEST(DatabaseEngineTests,canSelectDatasetFromContainerWithCriteria)
       {"student_dob",{"19871112","19930611","19951201","19890401"}},
       {"student_gender",{"female","female","female","female"}}
     };
+    std::cout << "Result set for all dataset with criterion: " << "\n" << query_result << "\n";
     ASSERT_TRUE(expected_result == query_result);
-    std::cout << "Result set for all dataset with criteria: " << "\n" << query_result << "\n";
   });
 
-  FAIL() << "Evaluation of more than one criterion - Not Implemented" << "\n";
-  // database_engine.ExecuteForDataManipulation(select_query2,[&](auto query_result) {
-  //   database::api_dataset_type expected_result = {
-  //     {"student_id",{"1","2","3","4","7"}},
-  //     {"student_name",{"Markus_Eisermann","Ulrike_Von_Stryk","Dominik_Vlad","Mathias_Zeug","Anna_Graser"}}
-  //   };
-  //   std::cout << "Result set for specific dataset with criteria: " << "\n" << query_result << "\n";
-  //   ASSERT_TRUE(expected_result == query_result);
-  //   // std::cout << "Result set for specific dataset with criteria: " << "\n" << query_result << "\n";
-  // });
+  database::Query select_query2 = "select student_id,student_name from university.student where student_dob > 19840918 and student_dob < 19930611";
+  ASSERT_TRUE(select_query2.transactionType() == database::select_dataset);
+  database::api_filter_type filter2 = {
+    {"student_dob",{{"19840918",database::greater_than},{"19930611",database::lesser_than}}}
+  };
+  ASSERT_TRUE(select_query2.filter() == filter2);
+  
+  database_engine.ExecuteForDataManipulation(select_query2,[&](auto query_result) {
+    database::api_dataset_type expected_result = {
+      {"student_id",{"1","2","3","7"}},
+      {"student_name",{"Markus_Eisermann","Ulrike_Von_Stryk","Dominik_Vlad","Anna_Graser"}}
+    };
+    std::cout << "Result set for specific dataset with criteria: " << "\n" << query_result << "\n";
+    ASSERT_TRUE(expected_result == query_result);
+  });
 }

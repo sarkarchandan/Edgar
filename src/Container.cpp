@@ -56,11 +56,24 @@ bool database::Container::_IsValidDataSetRequested(const std::vector<std::string
   return true;
 }
 
-void _PopulateValueIfNotExisting(std::vector<std::size_t>& vector,const std::size_t& value)
+std::vector<std::size_t> _CustomIntersect(const std::vector<std::size_t>& lhs,const std::vector<std::size_t>& rhs)
 {
-  if(std::find(vector.begin(),vector.end(),value) == vector.end())
-    vector.emplace_back(value);
-  else return;
+  if(lhs.empty() && rhs.empty()) return {};
+  else if(lhs.empty()) return rhs;
+  else if(rhs.empty()) return lhs;
+  else 
+  {
+    std::vector<std::size_t> intersection_buffer;
+    std::set_intersection(lhs.begin(),lhs.end(),rhs.begin(),rhs.end(),std::back_inserter(intersection_buffer));
+    if(!intersection_buffer.empty())
+      return intersection_buffer;
+    else
+    {
+      std::vector<std::size_t> union_buffer;
+      std::set_union(lhs.begin(),lhs.end(),rhs.begin(),rhs.end(),std::back_inserter(union_buffer));
+      return union_buffer;
+    }
+  }
 }
 
 void database::Container::_SelectAll(const std::function<void(const database::impl_dataset_type&)>& lambda) const
@@ -123,32 +136,35 @@ void database::Container::_SelectRawDataSetWithCriteria(const database::impl_fil
     throw std::runtime_error("One or more of requested columns are not present in schema");
 
   // Will have the final filtered indices for the values that match the criteria.
-  std::vector<std::size_t> index_buffer;
-
+  std::vector<std::size_t> primary_index_vector;
   //Iterating over each key-value pair in the filter_criteria and filter_comparison_type
   _for_each_criteria(filter_criteria,[&](auto filter_column,auto comparison_params){
 
     //This is the index of the column on which filtering must be applied
     std::size_t filter_column_index = std::distance(m_schema.begin(),m_schema.find(filter_column));
     
+    std::vector<std::size_t> secondary_index_vector;
     //Iterating over each pair of corresponding value respective compare_type provided in the given criteria
     _for_each_comparison(comparison_params,[&](auto value,auto compare) {
       auto column = m_data -> operator[](filter_column_index);
       
+      std::vector<std::size_t> tertiary_index_vector;
       //Iterating over each value in the given column to check if the filter criterion is satisfied O(n^3)
       for(std::size_t i = 0; i < column.size(); i += 1)
       {
         switch (compare)
         {
-          case equal_to: if(column[i] == value) _PopulateValueIfNotExisting(index_buffer,i); break;
-          case not_equal_to: if(column[i] != value) _PopulateValueIfNotExisting(index_buffer,i); break;
-          case greater_or_equal_to: if(column[i] >= value) _PopulateValueIfNotExisting(index_buffer,i); break;
-          case lesser_or_equal_to: if(column[i] <= value) _PopulateValueIfNotExisting(index_buffer,i); break;
-          case greater_than: if(column[i] > value) _PopulateValueIfNotExisting(index_buffer,i); break;
-          case lesser_than: if(column[i] < value) _PopulateValueIfNotExisting(index_buffer,i); break;
+          case equal_to: if(column[i] == value) tertiary_index_vector.emplace_back(i); break;
+          case not_equal_to: if(column[i] != value) tertiary_index_vector.emplace_back(i); break;
+          case greater_or_equal_to: if(column[i] >= value) tertiary_index_vector.emplace_back(i); break;
+          case lesser_or_equal_to: if(column[i] <= value) tertiary_index_vector.emplace_back(i); break;
+          case greater_than: if(column[i] > value) tertiary_index_vector.emplace_back(i); break;
+          case lesser_than: if(column[i] < value) tertiary_index_vector.emplace_back(i); break;
         }
       }
+      secondary_index_vector = _CustomIntersect(secondary_index_vector,tertiary_index_vector);
     });
+    primary_index_vector = _CustomIntersect(primary_index_vector,secondary_index_vector);
   });
 
   database::impl_dataset_type result; //Extract data with the filtered indices
@@ -164,7 +180,7 @@ void database::Container::_SelectRawDataSetWithCriteria(const database::impl_fil
     auto column = m_data -> operator[](column_index);
 
     std::vector<database::ComparableString> data_buffer;
-    std::transform(index_buffer.begin(),index_buffer.end(),std::back_inserter(data_buffer),[&](auto index) {
+    std::transform(primary_index_vector.begin(),primary_index_vector.end(),std::back_inserter(data_buffer),[&](auto index) {
       return column[index];
     });
     result[column_name] = data_buffer;

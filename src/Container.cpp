@@ -56,7 +56,7 @@ bool database::Container::_IsValidDataSetRequested(const std::vector<std::string
   return true;
 }
 
-std::vector<std::size_t> _CustomIntersect(const std::vector<std::size_t>& lhs,const std::vector<std::size_t>& rhs)
+std::vector<std::size_t> _ExecuteCustomIntersection(const std::vector<std::size_t>& lhs,const std::vector<std::size_t>& rhs,const database::DataType& data_type)
 {
   if(lhs.empty() && rhs.empty()) return {};
   else if(lhs.empty()) return rhs;
@@ -65,14 +65,18 @@ std::vector<std::size_t> _CustomIntersect(const std::vector<std::size_t>& lhs,co
   {
     std::vector<std::size_t> intersection_buffer;
     std::set_intersection(lhs.begin(),lhs.end(),rhs.begin(),rhs.end(),std::back_inserter(intersection_buffer));
-    if(!intersection_buffer.empty())
-      return intersection_buffer;
-    else
+    if(data_type == database::numeric) return intersection_buffer;
+    else if(data_type == database::non_numeric)
     {
-      std::vector<std::size_t> union_buffer;
-      std::set_union(lhs.begin(),lhs.end(),rhs.begin(),rhs.end(),std::back_inserter(union_buffer));
-      return union_buffer;
+      if(!intersection_buffer.empty()) return intersection_buffer;
+      else
+      {
+        std::vector<std::size_t> union_buffer;
+        std::set_union(lhs.begin(),lhs.end(),rhs.begin(),rhs.end(),std::back_inserter(union_buffer));
+        return union_buffer;
+      }
     }
+    else return {};
   }
 }
 
@@ -142,7 +146,7 @@ void database::Container::_SelectRawDataSetWithCriteria(const database::impl_fil
 
     //This is the index of the column on which filtering must be applied
     std::size_t filter_column_index = std::distance(m_schema.begin(),m_schema.find(filter_column));
-    
+    database::DataType column_type = m_schema.at(filter_column);
     std::vector<std::size_t> secondary_index_vector;
     //Iterating over each pair of corresponding value respective compare_type provided in the given criteria
     _for_each_comparison(comparison_params,[&](auto value,auto compare) {
@@ -162,9 +166,9 @@ void database::Container::_SelectRawDataSetWithCriteria(const database::impl_fil
           case lesser_than: if(column[i] < value) tertiary_index_vector.emplace_back(i); break;
         }
       }
-      secondary_index_vector = _CustomIntersect(secondary_index_vector,tertiary_index_vector);
+      secondary_index_vector = _ExecuteCustomIntersection(secondary_index_vector,tertiary_index_vector,column_type);
     });
-    primary_index_vector = _CustomIntersect(primary_index_vector,secondary_index_vector);
+    primary_index_vector = _ExecuteCustomIntersection(primary_index_vector,secondary_index_vector,column_type);
   });
 
   database::impl_dataset_type result; //Extract data with the filtered indices

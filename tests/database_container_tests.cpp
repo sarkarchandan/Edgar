@@ -6,10 +6,10 @@
 TEST(ContainerTests,canInitializeContainer)
 {
   std::map<std::string,database::DataType> schema = {
-    {"p_id",database::DataType::non_quantifiable},
-    {"p_name",database::DataType::non_quantifiable},
-    {"p_country",database::DataType::non_quantifiable},
-    {"p_date_added",database::DataType::non_quantifiable}};
+    {"p_id",database::numeric},
+    {"p_name",database::non_numeric},
+    {"p_country",database::non_numeric},
+    {"p_date_added",database::numeric}};
   database::Container container = database::TransactionFactory::ContainerWith_Name_Schema("Person",schema);
   std::hash<std::string> s_hash;
   std::size_t expected_container_id = s_hash("Person");
@@ -21,9 +21,9 @@ TEST(ContainerTests,canInitializeContainer)
 TEST(ContainerTests, canStoreAndRetrieveAllData)
 {
   std::map<std::string,database::DataType> schema = {
-    {"p_id",database::DataType::non_quantifiable},
-    {"p_name",database::DataType::non_quantifiable},
-    {"p_country",database::DataType::non_quantifiable}};
+    {"p_id",database::non_numeric},
+    {"p_name",database::non_numeric},
+    {"p_country",database::non_numeric}};
 
   database::Container container = database::TransactionFactory::ContainerWith_Name_Schema("Person",schema);
   std::map<std::string,database::ComparableString> value1 = {
@@ -54,9 +54,9 @@ TEST(ContainerTests, canStoreAndRetrieveAllData)
 TEST(ContainerTests,canStoreAndRetrieveDataBasedOnSingleCriterion)
 {
   std::map<std::string,database::DataType> schema = {
-    {"p_id",database::DataType::non_quantifiable},
-    {"p_name",database::DataType::non_quantifiable},
-    {"p_country",database::DataType::non_quantifiable}};
+    {"p_id",database::non_numeric},
+    {"p_name",database::non_numeric},
+    {"p_country",database::non_numeric}};
 
   database::Container container = database::TransactionFactory::ContainerWith_Name_Schema("Person",schema);
   std::map<std::string,database::ComparableString> value1 = {
@@ -153,10 +153,10 @@ TEST(ContainerTests,canStoreAndRetrieveDataBasedOnSingleCriterion)
 TEST(ContainerTests,canUpdateDataBasedOnSingleCriterion)
 {
   std::map<std::string,database::DataType> schema = {
-    {"emp_id",database::DataType::non_quantifiable},
-    {"emp_name",database::DataType::non_quantifiable},
-    {"emp_status",database::DataType::non_quantifiable},
-    {"emp_start_date",database::DataType::non_quantifiable}
+    {"emp_id",database::non_numeric},
+    {"emp_name",database::non_numeric},
+    {"emp_status",database::non_numeric},
+    {"emp_start_date",database::non_numeric}
   };
   database::Container container = database::TransactionFactory::ContainerWith_Name_Schema("Employee",schema);
   std::map<std::string,database::ComparableString> value1 = {

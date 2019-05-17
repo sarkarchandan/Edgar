@@ -22,10 +22,10 @@ database::impl_schema_type PrepareSchema(const database::api_schema_type& raw_sc
   std::for_each(raw_schema.begin(),raw_schema.end(),[&](auto pair) {
     switch (pair.second)
     {
-      case database::integer: schema[pair.first] = database::DataType::quantifiable; break;
-      case database::string: schema[pair.first] = database::DataType::non_quantifiable; break;
-      case database::boolean: schema[pair.first] = database::DataType::non_quantifiable; break;
-      case database::date: schema[pair.first] = database::non_quantifiable; break;
+      case database::integer: schema[pair.first] = database::numeric; break;
+      case database::string: schema[pair.first] = database::non_numeric; break;
+      case database::boolean: schema[pair.first] = database::non_numeric; break;
+      case database::date: schema[pair.first] = database::numeric; break;
       default: break;
     }
   });

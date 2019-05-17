@@ -13,9 +13,9 @@ std::ostream& operator <<(std::ostream& stream, const database::ComparableString
 template<typename Type>
 std::ostream& operator <<(std::ostream& stream, const std::vector<Type>& vector)
 {
-  stream << "{  ";
+  stream << "{";
   for(Type value: vector)
-    stream << value << "\t";
+    stream << value << " ";
   stream << "}";
   return stream;
 }

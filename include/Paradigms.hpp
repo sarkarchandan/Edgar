@@ -58,8 +58,8 @@ namespace database
 
   enum DataType
   {
-    quantifiable,
-    non_quantifiable,
+    numeric,
+    non_numeric,
     other
   };
 

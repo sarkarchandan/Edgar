@@ -133,16 +133,16 @@ TEST(DatabaseEngineTests,canSelectDatasetFromContainer)
 TEST(DatabaseEngineTests,canSelectDatasetFromContainerWithCriteria)
 {
   database::Query query_create_database = "create database university";
-  database::Query query_create_container = "create container university.student (student_id integer,student_name string,student_dob string,student_gender string";
+  database::Query query_create_container = "create container university.student (student_id integer,student_name string,student_dob string,student_gender string, student_country string";
   std::vector<database::Query> insert_queries = {
-    "insert into university.student values(student_id:1,student_name:Markus_Eisermann,student_dob:19920312,student_gender:male)",
-    "insert into university.student values(student_id:2,student_name:Ulrike_Von_Stryk,student_dob:19871112,student_gender:female)",
-    "insert into university.student values(student_id:3,student_name:Dominik_Vlad,student_dob:19900821,student_gender:male)",
-    "insert into university.student values(student_id:4,student_name:Mathias_Zeug,student_dob:19840918,student_gender:male)",
-    "insert into university.student values(student_id:5,student_name:Kerstin_Peh,student_dob:19930611,student_gender:female)",
-    "insert into university.student values(student_id:6,student_name:Tanja_Schimdt,student_dob:19951201,student_gender:female)",
-    "insert into university.student values(student_id:7,student_name:Anna_Graser,student_dob:19890401,student_gender:female)",
-    "insert into university.student values(student_id:8,student_name:Martin_Kaiser,student_dob:19840310,student_gender:male)",
+    "insert into university.student values(student_id:1,student_name:Markus_Eisermann,student_dob:19920312,student_gender:male,student_country:DE)",
+    "insert into university.student values(student_id:2,student_name:Ulrike_Von_Stryk,student_dob:19871112,student_gender:female,student_country:FR)",
+    "insert into university.student values(student_id:3,student_name:Dominik_Vlad,student_dob:19900821,student_gender:male,student_country:FR)",
+    "insert into university.student values(student_id:4,student_name:Mathias_Zeug,student_dob:19840918,student_gender:male,student_country:DE)",
+    "insert into university.student values(student_id:5,student_name:Kerstin_Peh,student_dob:19930611,student_gender:female,student_country:ES)",
+    "insert into university.student values(student_id:6,student_name:Tanja_Schimdt,student_dob:19951201,student_gender:female,student_country:DE)",
+    "insert into university.student values(student_id:7,student_name:Anna_Graser,student_dob:19890401,student_gender:female,student_country:FR)",
+    "insert into university.student values(student_id:8,student_name:Martin_Kaiser,student_dob:19840310,student_gender:male,student_country:ES)",
   };
   database::DatabaseEngine database_engine;
   database_engine.ExecuteForDataDefinition(query_create_database,[&](auto database_created) {
@@ -164,7 +164,8 @@ TEST(DatabaseEngineTests,canSelectDatasetFromContainerWithCriteria)
       {"student_id",{"2","5","6","7"}},
       {"student_name",{"Ulrike_Von_Stryk","Kerstin_Peh","Tanja_Schimdt","Anna_Graser"}},
       {"student_dob",{"19871112","19930611","19951201","19890401"}},
-      {"student_gender",{"female","female","female","female"}}
+      {"student_gender",{"female","female","female","female"}},
+      {"student_country",{"FR","ES","DE","FR"}}
     };
     std::cout << "Result set for all dataset with criterion: " << "\n" << query_result << "\n";
     ASSERT_TRUE(expected_result == query_result);
@@ -184,5 +185,22 @@ TEST(DatabaseEngineTests,canSelectDatasetFromContainerWithCriteria)
     };
     std::cout << "Result set for specific dataset with criteria: " << "\n" << query_result << "\n";
     ASSERT_TRUE(expected_result == query_result);
+  });
+
+  database::Query select_query3 = "select student_name,student_dob from university.student where student_country <> de and student_country <> es";
+  ASSERT_TRUE(select_query3.transactionType() == database::select_dataset);
+  std::vector<std::string> select_query3_dataset = {"student_name","student_dob"};
+  ASSERT_TRUE(select_query3.dataset() == select_query3_dataset);
+  database::api_filter_type select_query3_filter = {
+    {"student_country",{{"de",database::not_equal_to},{"es",database::not_equal_to}}}
+  };
+  ASSERT_TRUE(select_query3.filter() == select_query3_filter);
+  database_engine.ExecuteForDataManipulation(select_query3,[&](auto query_result) {
+    database::api_dataset_type expected_result = {
+      {"student_name",{"Ulrike_Von_Stryk","Dominik_Vlad","Anna_Graser"}},
+      {"student_dob",{"19871112","19900821","19890401"}}
+    };
+    std::cout << "Result set for specific dataset with criteria: " << "\n" << query_result << "\n";
+    ASSERT_TRUE(query_result == expected_result);
   });
 }

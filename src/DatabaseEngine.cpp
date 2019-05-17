@@ -150,6 +150,13 @@ void database::DatabaseEngine::SelectRawDataSetFromContainerWithCriteria(const s
   else result({});
 }
 
+void database::DatabaseEngine::UpdateDataSetInContainerWithCriteria(const std::string& database_name,const std::string& container_name,const database::api_filter_type& filter_criteria,const database::api_insert_update_type& new_value)
+{
+  
+  //TODO Implement update
+  exit(EXIT_FAILURE);
+}
+
 #pragma mark Implementation for data manipulation
 void database::DatabaseEngine::ExecuteForDataDefinition(const database::Query& query,const std::function<void(bool)>& completion)
 {

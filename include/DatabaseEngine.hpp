@@ -94,7 +94,18 @@ namespace database
       const std::vector<std::string>& data_set,
       const std::function<void(const database::api_dataset_type&)>& lambda);
 
-    
+    /*
+    ! Updates specified dataset in the container based on given criteria
+    * @param name of the database
+    * @param name of the container
+    * @param key_values which should be regarded for comparison of data for filtering
+    * @param key-values representing the new values which should be updated
+    */
+    void UpdateDataSetInContainerWithCriteria(
+      const std::string& database_name,
+      const std::string& container_name,
+      const database::api_filter_type& filter_criteria,
+      const database::api_insert_update_type& new_value);
 
     #pragma mark Public api layer
     public:

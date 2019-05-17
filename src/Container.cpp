@@ -2,7 +2,7 @@
 #include "Utility.hpp"
 
 std::string database::Container::name() const { return m_name; }
-std::size_t database::Container::id() const { return m_id; }
+size_t database::Container::id() const { return m_id; }
 database::impl_schema_type database::Container::schema() const { return m_schema; }
 
 void database::Container::_PrepareContainer()
@@ -10,7 +10,7 @@ void database::Container::_PrepareContainer()
   std::hash<std::string> s_hash;
   m_id = s_hash(m_name);
   m_data = std::make_unique<database::impl_storage_type>();
-  for(std::size_t i = 0; i < m_schema.size(); i += 1)
+  for(size_t i = 0; i < m_schema.size(); i += 1)
   {
     std::vector<database::ComparableString> vector;
     m_data -> emplace_back(vector);
@@ -24,12 +24,12 @@ bool database::Container::_HaveSameKeysFor(const database::impl_insert_update_ty
 
 void database::Container::_InsertInto(const database::impl_insert_update_type& values)
 {
-  /*Check validity of the provided key-values against defined schema*/
+  //! Check validity of the provided key-values against defined schema
   if(!_HaveSameKeysFor(values,m_schema))
     throw std::runtime_error("Insert attempted with invalid columns");
 
   std::for_each(values.begin(),values.end(),[&](auto pair){
-    std::size_t index = std::distance(m_schema.begin(),m_schema.find(pair.first));
+    size_t index = std::distance(m_schema.begin(),m_schema.find(pair.first));
     m_data -> operator[](index).emplace_back(pair.second);
   });
 }
@@ -56,14 +56,14 @@ bool database::Container::_IsValidDataSetRequested(const std::vector<std::string
   return true;
 }
 
-std::vector<std::size_t> _ExecuteCustomIntersection(const std::vector<std::size_t>& lhs,const std::vector<std::size_t>& rhs,const database::DataType& data_type)
+std::vector<size_t> _ExecuteCustomIntersection(const std::vector<size_t>& lhs,const std::vector<size_t>& rhs,const database::DataType& data_type)
 {
   if(lhs.empty() && rhs.empty()) return {};
   else if(lhs.empty()) return rhs;
   else if(rhs.empty()) return lhs;
   else 
   {
-    std::vector<std::size_t> intersection_buffer;
+    std::vector<size_t> intersection_buffer;
     std::set_intersection(lhs.begin(),lhs.end(),rhs.begin(),rhs.end(),std::back_inserter(intersection_buffer));
     if(data_type == database::numeric) return intersection_buffer;
     else if(data_type == database::non_numeric)
@@ -71,7 +71,7 @@ std::vector<std::size_t> _ExecuteCustomIntersection(const std::vector<std::size_
       if(!intersection_buffer.empty()) return intersection_buffer;
       else
       {
-        std::vector<std::size_t> union_buffer;
+        std::vector<size_t> union_buffer;
         std::set_union(lhs.begin(),lhs.end(),rhs.begin(),rhs.end(),std::back_inserter(union_buffer));
         return union_buffer;
       }
@@ -84,7 +84,7 @@ void database::Container::_SelectAll(const std::function<void(const database::im
 {
   database::impl_dataset_type result;
   std::for_each(m_schema.begin(),m_schema.end(),[&](auto pair){
-    std::size_t index = std::distance(m_schema.begin(),m_schema.find(pair.first));
+    size_t index = std::distance(m_schema.begin(),m_schema.find(pair.first));
     result[pair.first] = m_data -> operator[](index);
   });
   lambda(result);
@@ -129,32 +129,41 @@ void _for_each_comparison(const database::impl_compare_type values,const std::fu
   }
 }
 
+/*
+! NOTE - Only considers the logical AND scenarios for comparing
+TODO Need to implement logical OR scenarios
+TODO Need to think about possiblity of better asymptotic complexity
+*/
 void database::Container::_SelectRawDataSetWithCriteria(const database::impl_filter_type& filter_criteria,const std::vector<std::string>& dataset,const std::function<void(const database::impl_dataset_type&)>& lambda) const
 {
-  /*Check validity of the provided key-value criteria against defined schema*/
-  if(!database::Container::_IsValidFilterCriteriaForRawSelection(filter_criteria))
+  //! Check validity of the provided key-value criteria against defined schema
+  if(!database::Container::_IsValidFilterCriteriaForRawSelection(filter_criteria)) 
     throw std::runtime_error("Select attempted with invalid column identifiers");
 
-  /*Check if the requested dataset is valid*/
+  //! Check if the requested dataset is valid
   if(!_IsValidDataSetRequested(dataset))
     throw std::runtime_error("One or more of requested columns are not present in schema");
 
-  // Will have the final filtered indices for the values that match the criteria.
-  std::vector<std::size_t> primary_index_vector;
-  //Iterating over each key-value pair in the filter_criteria and filter_comparison_type
+  //! Will have the final filtered indices for the values that match the criteria
+  std::vector<size_t> primary_index_vector;
+
+  //! Iterating over each key-value pair in the filter_criteria and filter_comparison_type
   _for_each_criteria(filter_criteria,[&](auto filter_column,auto comparison_params){
 
-    //This is the index of the column on which filtering must be applied
-    std::size_t filter_column_index = std::distance(m_schema.begin(),m_schema.find(filter_column));
+    //! This is the index of the column on which filtering must be applied
+    size_t filter_column_index = std::distance(m_schema.begin(),m_schema.find(filter_column));
     database::DataType column_type = m_schema.at(filter_column);
-    std::vector<std::size_t> secondary_index_vector;
-    //Iterating over each pair of corresponding value respective compare_type provided in the given criteria
+
+    std::vector<size_t> secondary_index_vector;
+
+    //! Iterating over each pair of corresponding value and respective compare_type provided in the given filter
     _for_each_comparison(comparison_params,[&](auto value,auto compare) {
       auto column = m_data -> operator[](filter_column_index);
       
-      std::vector<std::size_t> tertiary_index_vector;
-      //Iterating over each value in the given column to check if the filter criterion is satisfied O(n^3)
-      for(std::size_t i = 0; i < column.size(); i += 1)
+      std::vector<size_t> tertiary_index_vector;
+
+      //! Iterating over each value in the given column to check if the filter criterion is satisfied O(n^3)
+      for(size_t i = 0; i < column.size(); i += 1)
       {
         switch (compare)
         {
@@ -171,7 +180,8 @@ void database::Container::_SelectRawDataSetWithCriteria(const database::impl_fil
     primary_index_vector = _ExecuteCustomIntersection(primary_index_vector,secondary_index_vector,column_type);
   });
 
-  database::impl_dataset_type result; //Extract data with the filtered indices
+  //! Extract data with the filtered indices
+  database::impl_dataset_type result; 
 
   std::vector<std::string> required_columns;
   if(dataset.empty())
@@ -180,7 +190,7 @@ void database::Container::_SelectRawDataSetWithCriteria(const database::impl_fil
     required_columns = dataset;
 
   for_each(required_columns.begin(),required_columns.end(),[&](auto column_name) {
-    std::size_t column_index = std::distance(m_schema.begin(),m_schema.find(column_name));
+    size_t column_index = std::distance(m_schema.begin(),m_schema.find(column_name));
     auto column = m_data -> operator[](column_index);
 
     std::vector<database::ComparableString> data_buffer;
@@ -192,12 +202,12 @@ void database::Container::_SelectRawDataSetWithCriteria(const database::impl_fil
   lambda(result);
 }
 
-void database::Container::_UpdateValueForIndex(const std::size_t& index,const database::impl_insert_update_type& new_value)
+void database::Container::_UpdateValueForIndex(const size_t& index,const database::impl_insert_update_type& new_value)
 {
   if(new_value.empty()) return;
   for(auto pair: new_value)
   {
-    std::size_t column_index = std::distance(m_schema.begin(),m_schema.find(pair.first));
+    size_t column_index = std::distance(m_schema.begin(),m_schema.find(pair.first));
     m_data -> operator[](column_index)[index] = pair.second;
   }
 }
@@ -212,7 +222,7 @@ void database::Container::_Update(const database::impl_filter_type& filter_crite
   _for_each_criteria(filter_criteria,[&](auto filter_column,auto comparison_params){
 
     //This is the index of the column on which filtering must be applied
-    std::size_t filter_column_index = std::distance(m_schema.begin(),m_schema.find(filter_column));
+    size_t filter_column_index = std::distance(m_schema.begin(),m_schema.find(filter_column));
 
     //Iterating over each pair of corresponding value respective compare_type provided in the given criteria
     _for_each_comparison(comparison_params,[&](auto value,auto compare) {
@@ -220,7 +230,7 @@ void database::Container::_Update(const database::impl_filter_type& filter_crite
       auto column = m_data -> operator[](filter_column_index);
 
       //Iterating over each value in the given column to check if the filter criterion is satisfied O(n^3)
-      for(std::size_t i = 0; i < column.size(); i += 1)
+      for(size_t i = 0; i < column.size(); i += 1)
       {
         switch (compare)
         {
@@ -238,10 +248,12 @@ void database::Container::_Update(const database::impl_filter_type& filter_crite
 
 void database::Container::_DeleteFrom(const database::impl_filter_type& filter_criteria)
 {
+  //! Not Implemented
   exit(EXIT_FAILURE);
 }
 
 void database::Container::_Truncate()
 {
+  //! Not Implemented
   exit(EXIT_FAILURE);
 }

@@ -78,16 +78,15 @@ namespace database
     private:
     void _PrepareContainer();
 
-    //Insert data into Container
     bool _HaveSameKeysFor(
       const database::impl_insert_update_type& lhs, 
       const database::impl_schema_type& rhs
     ) const;
+
     void _InsertInto(
       const impl_insert_update_type& values
     );
 
-    //Select from container with given filter criteria
     bool _IsValidFilterCriteriaForRawSelection(
       const database::impl_filter_type& filter_criteria) const;
 
@@ -99,9 +98,11 @@ namespace database
 
     void _SelectAll(
       const std::function<void(const database::impl_dataset_type&)>& lambda) const;
+
     void _SelectRawDataSet(
       const std::vector<std::string>& dataset,
       const std::function<void(const database::impl_dataset_type&)>& lambda) const;
+
     void _SelectRawDataSetWithCriteria(
       const database::impl_filter_type& filter_criteria,
       const std::vector<std::string>& dataset,
@@ -116,11 +117,11 @@ namespace database
       const database::impl_filter_type& filter_criteria,
       const database::impl_insert_update_type& new_value);
 
-    //Delete data from container with given filter criteria
+    
     void _DeleteFrom(
       const database::impl_filter_type& filter_criteria);
 
-    //Delete all data from the container keeping the schema intact
+    
     void _Truncate();
   };
 }

@@ -13,7 +13,10 @@ TEST(QueryTests,canDeriveTransactionType)
   database::Query query_select_dataset_with_criteria = "select employee_id,employee_name from company.employee where employee_id = 1";
   database::Query query_update = "update company.employee set employee_status = fulltime where employee_id = 1";
   database::Query query_truncate = "truncate container company.employee";
-
+  /*
+  !ALTER CONTAINER  - not implemented
+  TODO Need to implement the processing for alter container query
+  */
   // database::Query query_alter = "alter container company.employee delete column employee_status";// To Be Adjusted Later
 
   database::Query query_delete_from = "delete from company.employee where employee_id = 1";
@@ -46,9 +49,6 @@ TEST(QueryTests,canDeriveTransactionType)
 
   ASSERT_TRUE(query_truncate.transactionType() == database::truncate);
   ASSERT_TRUE(query_truncate.transactionMetaType() == database::dml);
-
-  // ASSERT_TRUE(query_alter.transactionType() == database::alter);
-  // ASSERT_TRUE(query_alter.transactionMetaType() == database::ddl);
 
   ASSERT_TRUE(query_delete_from.transactionType() == database::delete_from);
   ASSERT_TRUE(query_delete_from.transactionMetaType() == database::dml);
@@ -159,7 +159,6 @@ TEST(QueryTests_SelectDataSetWithCriteria,canDetermineSpecificationForSelectData
   ASSERT_TRUE(query_select_dataset_with_criteria3.transactionMetaType() == database::dml);
   ASSERT_TRUE(query_select_dataset_with_criteria3.databaseName() == "company");
   ASSERT_TRUE(query_select_dataset_with_criteria3.containerName() == "employee");
-  std::cout << "Expected dataset: " << query_select_dataset_with_criteria3.dataset() << "\n";
   std::vector<std::string> expected_dataset3 = {"employee_id","employee_name","employee_status"};
   ASSERT_TRUE(query_select_dataset_with_criteria3.dataset() == expected_dataset3);
   database::api_filter_type filter3 = {

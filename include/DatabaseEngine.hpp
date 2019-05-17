@@ -20,8 +20,8 @@ namespace database
 
     #pragma mark Private implementation layer
     private:
-    /**
-     * Creates a database with a name
+    /*
+     ! Creates a database with a name
      * @param name of the database
      * @param lambda function indicating whether the operation is successful
     */
@@ -29,8 +29,8 @@ namespace database
       const std::string& database_name,
       const std::function<void(bool)>& completion);
 
-    /**
-     * Creates a container with name in a specified database
+    /*
+     ! Creates a container with name in a specified database
      * @param name of the database
      * @param name of the container
      * @param schema for the container
@@ -42,8 +42,8 @@ namespace database
       const database::api_schema_type& container_schema,
       const std::function<void(bool)>& completion);
 
-    /**
-     * Inserts data into container
+    /*
+     ! Inserts data into container
      * @param name of the database
      * @param name of the container
      * @param values to be inserted
@@ -55,8 +55,8 @@ namespace database
       const database::api_insert_update_type& values,
       const std::function<void(const database::api_dataset_type&)>& result);
 
-    /**
-     * Selects all from a given container
+    /*
+     ! Selects all from a given container
      * @param name of the database
      * @param name of the container
      * @param lambda function where result of the operation is expected
@@ -66,8 +66,8 @@ namespace database
       const std::string& container_name,
       const std::function<void(const database::api_dataset_type&)>& result);
 
-    /**
-     * Selects specified dataset from the container
+    /*
+     ! Selects specified dataset from the container
      * @param name of the database
      * @param name of the container
      * @param column names for which datset is required
@@ -79,8 +79,8 @@ namespace database
       const std::vector<std::string>& data_set,
       const std::function<void(const database::api_dataset_type&)>& result);
 
-    /**
-     * Selects specified dataset from the container based on given criteria
+    /*
+     ! Selects specified dataset from the container based on given criteria
      * @param name of the database
      * @param name of the container
      * @param key_values which should be regarded for comparison of data for filtering
@@ -94,10 +94,12 @@ namespace database
       const std::vector<std::string>& data_set,
       const std::function<void(const database::api_dataset_type&)>& lambda);
 
+    
+
     #pragma mark Public api layer
     public:
-    /**
-     * Executes a data definition query
+    /*
+     ! Executes a data definition query
      * @param a data definition query
      * @param lambda function indicating whether the operation is successful
     */
@@ -105,8 +107,8 @@ namespace database
       const database::Query& query,
       const std::function<void(bool)>& completion);
     
-    /**
-     * Executes a data manipulation query
+    /*
+     ! Executes a data manipulation query
      * @param a data manipulation query
      * @param lambda function where result of the operation is expected
     */

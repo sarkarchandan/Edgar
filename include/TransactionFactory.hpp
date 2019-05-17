@@ -14,8 +14,8 @@ namespace database
     #pragma mark Public factory methods
     public:
 
-    /**
-     * Creates a database container
+    /*
+     ! Creates a database container
      * @param name of the container
      * @param schema for the container
     */
@@ -23,8 +23,8 @@ namespace database
       const std::string& container_name, 
       const std::map<std::string,DataType>& container_schema);
 
-    /**
-     * Inserts data into the container
+    /*
+     ! Inserts data into the container
      * @param container
      * @param values to be inserted (can be compared as the set of key-value mapping between the column name and the data)
     */
@@ -32,8 +32,8 @@ namespace database
       database::Container& container, 
       const database::impl_insert_update_type& values);
 
-    /**
-     * Selects all data from the container
+    /*
+     ! Selects all data from the container
      * @param container
      * @param lambda function where the result is expected
     */
@@ -41,8 +41,8 @@ namespace database
       const database::Container& container,
       const std::function<void(const database::impl_dataset_type&)>& lambda);
 
-    /**
-     * Selects chosen dataset from the container
+    /*
+     ! Selects chosen dataset from the container
      * @param container
      * @param required columns
      * @param lambda function where the result is expected
@@ -52,8 +52,8 @@ namespace database
       const std::vector<std::string>& dataset,
       const std::function<void(const database::impl_dataset_type&)>& lambda);
 
-    /**
-     * Selects data from the container based based on some criteria
+    /*
+     ! Selects data from the container based based on some criteria
      * @param container
      * @param key_values which should be regarded for comparison of data for filtering
      * @param columns for which data should be selected
@@ -65,8 +65,8 @@ namespace database
       const std::vector<std::string>& dataset,
       const std::function<void(const database::impl_dataset_type&)>& lambda);
       
-    /**
-     * Updates data in the container based on the passed in criteria
+    /*
+     ! Updates data in the container based on the passed in criteria
      * @param container
      * @param key_values which should be regarded for comparison of data for filtering
      * @param key-values representing the new values which should be updated
@@ -76,8 +76,8 @@ namespace database
       const database::impl_filter_type& filter_criteria,
       const database::impl_insert_update_type& new_value);
 
-    /**
-     * Deletes data from the container based on the passed in criteria
+    /*
+     ! Deletes data from the container based on the passed in criteria
      * @param container
      * @param key_values which should be regarded for comparison of data for filtering
     */
@@ -85,8 +85,8 @@ namespace database
       database::Container& container,
       const database::impl_filter_type& filter_criteria);
 
-    /**
-     * Deletes all data from the container keeping the schema intact
+    /*
+     ! Deletes all data from the container keeping the schema intact
      * @param container
     */
     static void Truncate(database::Container& container);

@@ -308,6 +308,10 @@ std::pair<database::TransactionType,std::string> _Transaction_Filter(const std::
   std::regex tran_select_dataset("^SELECT.",std::regex_constants::icase);
   std::regex tran_update("^UPDATE.",std::regex_constants::icase);
   std::regex tran_truncate("^TRUNCATE CONTAINER.",std::regex_constants::icase);
+  /*
+  !ALTER CONTAINER  - not implemented
+  TODO Need to implement the processing for alter container query
+  */
   // std::regex tran_alter("^ALTER CONTAINER.",std::regex_constants::icase);
   std::regex tran_delete("^DELETE FROM.",std::regex_constants::icase);
   std::regex tran_drop_container("^DROP CONTAINER.",std::regex_constants::icase);
@@ -407,6 +411,10 @@ void database::Query::_ParseQueryString()
     });
   }
 
+  /*
+  !ALTER CONTAINER  - not implemented
+  TODO Need to implement the processing for alter container query
+  */
   //Alter Container - To Be Adjusted Later
   // else if(m_transaction_type == database::alter)
   // {

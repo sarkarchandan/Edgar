@@ -142,9 +142,9 @@ database_engine.ExecuteForDataManipulation(query_insert_into,[&](auto query_resu
 
 	//Snapshot of the inserted record will be available as the result of the query which has the type std::map<std::string,std::vector<std::string>>
 	/*
-	employee_id		{1}
-	employee_name		{chandan}
-	employee_status	{fulltime}
+	employee_id - {1}
+	employee_name	 - {chandan}
+	employee_status - {fulltime}
 	*/
 
 });
@@ -168,9 +168,9 @@ database_engine.ExecuteForDataManipulation(query_select_all,[&](auto query_resul
 
 	//Result set for the select query of (std::map<std::string,std::vector<std::string>>)
 	/*
-	employee_id		{1 2 3 4}
-	employee_name		{Dominik_Schmidt Mathias_Heinrich Andreas_Renner Marcus_Kaiser}
-	employee_status	{fulltime parttime parttime fulltime}
+	employee_id - {1 2 3 4}
+	employee_name	 - {Dominik_Schmidt Mathias_Heinrich Andreas_Renner Marcus_Kaiser}
+	employee_status - {fulltime parttime parttime fulltime}
 	*/
 
 });
@@ -201,8 +201,8 @@ database_engine.ExecuteForDataManipulation(query_select_dataset1,[&](auto query_
 
 	//Result set for the select query of (std::map<std::string,std::vector<std::string>>)
 	/*
-	employee_id		{1 2 3 4}
-	employee_name		{Dominik_Schimdt Heinrich_Keil Mathias_Rheinlein Marcus_Eisermann}
+	employee_id - {1 2 3 4}
+	employee_name	 - {Dominik_Schimdt Heinrich_Keil Mathias_Rheinlein Marcus_Eisermann}
 	*/
 });
 
@@ -236,11 +236,11 @@ database_engine.ExecuteForDataManipulation(select_query1,[&](auto query_result) 
 
 	//Result set for the select query of (std::map<std::string,std::vector<std::string>>)
 	/*
-	student_country		{FR ES DE FR }
-	student_dob			{19871112 19930611 19951201 19890401 }
-	student_gender		{female female female female }
-	student_id			{2 5 6 7 }
-	student_name			{Ulrike_Von_Stryk Kerstin_Peh Tanja_Schimdt Anna_Graser }
+	student_country - {FR ES DE FR }
+	student_dob - {19871112 19930611 19951201 19890401 }
+	student_gender - {female female female female }
+	student_id - {2 5 6 7 }
+	student_name - {Ulrike_Von_Stryk Kerstin_Peh Tanja_Schimdt Anna_Graser }
 	*/
 
 });
@@ -251,8 +251,8 @@ database_engine.ExecuteForDataManipulation(select_query2,[&](auto query_result) 
 
 	//Result set for the select query of (std::map<std::string,std::vector<std::string>>)
 	/*
-	student_id		{1 2 3 7 }
-	student_name		{Markus_Eisermann Ulrike_Von_Stryk Dominik_Vlad Anna_Graser }
+	student_id - {1 2 3 7 }
+	student_name - {Markus_Eisermann Ulrike_Von_Stryk Dominik_Vlad Anna_Graser }
 	*/
 
 });
@@ -263,8 +263,8 @@ database_engine.ExecuteForDataManipulation(select_query3,[&](auto query_result) 
 
 	//Result set for the select query of (std::map<std::string,std::vector<std::string>>)
 	/*
-	student_dob		{19871112 19900821 19890401 }
-	student_name		{Ulrike_Von_Stryk Dominik_Vlad Anna_Graser }
+	student_dob - {19871112 19900821 19890401 }
+	student_name - {Ulrike_Von_Stryk Dominik_Vlad Anna_Graser }
 	*/
 
 });

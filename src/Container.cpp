@@ -212,6 +212,10 @@ void database::Container::_UpdateValueForIndex(const size_t& index,const databas
   }
 }
 
+/*
+!Need to revise the entire update implementation for better handling of filtering
+TODO Revise filtering for update
+*/
 void database::Container::_Update(const database::impl_filter_type& filter_criteria,const database::impl_insert_update_type& new_value)
 {
   /*Check validity of the provided key-value criteria against defined schema*/

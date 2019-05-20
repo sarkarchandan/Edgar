@@ -167,7 +167,7 @@ TEST(DatabaseEngineTests,canSelectDatasetFromContainerWithCriteria)
       {"student_gender",{"female","female","female","female"}},
       {"student_country",{"FR","ES","DE","FR"}}
     };
-    std::cout << "Result set for all dataset with criterion: " << "\n" << query_result << "\n";
+    std::cout << "Result set for all dataset with criterion - query 1: " << "\n" << query_result << "\n";
     ASSERT_TRUE(expected_result == query_result);
   });
 
@@ -183,7 +183,7 @@ TEST(DatabaseEngineTests,canSelectDatasetFromContainerWithCriteria)
       {"student_id",{"1","2","3","7"}},
       {"student_name",{"Markus_Eisermann","Ulrike_Von_Stryk","Dominik_Vlad","Anna_Graser"}}
     };
-    std::cout << "Result set for specific dataset with criteria: " << "\n" << query_result << "\n";
+    std::cout << "Result set for specific dataset with criteria: - query 2 " << "\n" << query_result << "\n";
     ASSERT_TRUE(expected_result == query_result);
   });
 
@@ -200,7 +200,7 @@ TEST(DatabaseEngineTests,canSelectDatasetFromContainerWithCriteria)
       {"student_name",{"Ulrike_Von_Stryk","Dominik_Vlad","Anna_Graser"}},
       {"student_dob",{"19871112","19900821","19890401"}}
     };
-    std::cout << "Result set for specific dataset with criteria: " << "\n" << query_result << "\n";
+    std::cout << "Result set for specific dataset with criteria - query 3: " << "\n" << query_result << "\n";
     ASSERT_TRUE(query_result == expected_result);
   });
 }

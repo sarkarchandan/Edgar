@@ -113,39 +113,44 @@ $ ctest
 ##### Following are some examples of constructing simple queries and using them for simple database operations to store and query data.  Examples will be updated with the ongoing work of implementing the features of the library.
 
 ```cpp
-//Some example of simple database operations
+/*Some example of simple database operations*/
 
 //DatabaseEngine accepts data definition and data manipulation queries
 database::DatabaseEngine database_engine;
 
-
 /** Create a Database **/
+
 database::Query query_create_database = "create database company";
+
 database_engine.ExecuteForDataDefinition(query_create_database,[&](bool database_created){
-    ASSERT_TRUE(database_created);
+    //The variable database_created has true value
 });
 
 /** Create a Container **/
+
 database::Query query_create_container = "create container company.employee(employee_id integer,employee_name string,employee_status string)";
+
 database_engine.ExecuteForDataDefinition(query_create_container,[&](auto container_created) {
-    ASSERT_TRUE(container_created);
+    //The variable container_created has true value
 });
 
 /** Insert data into Container **/
+
 database::Query query_insert_into = "insert into company.employee values(employee_id:1,employee_name:chandan,employee_status:fulltime)";
+
 database_engine.ExecuteForDataManipulation(query_insert_into,[&](auto query_result) {
 
-//Snapshot of the inserted record will be available as the result of the query which has the type std::map<std::string,std::vector<std::string>>
-
-/*
-employee_id	{1}
-employee_name	{chandan}
-employee_status	{fulltime}
-*/
+	//Snapshot of the inserted record will be available as the result of the query which has the type std::map<std::string,std::vector<std::string>>
+	/*
+	employee_id		{1}
+	employee_name	{chandan}
+	employee_status	{fulltime}
+	*/
 
 });
 
 /** Inserting a set of records to the Container and fetch all **/
+
 std::vector<database::Query> insert_queries = {
     "insert into company.employee values(employee_id:1,employee_name:Dominik_Schmidt,employee_status:fulltime)",
     "insert into company.employee values(employee_id:2,employee_name:Mathias_Heinrich,employee_status:parttime)",
@@ -158,29 +163,33 @@ std::for_each(insert_queries.begin(),insert_queries.end(),[&](auto query) {
 });
 
 database::Query query_select_all = "select * from company.employee";
+
 database_engine.ExecuteForDataManipulation(query_select_all,[&](auto query_result) {
 
-//Result set for the select query, which has the type std::map<std::string,std::vector<std::string>>
-
-/*
-employee_id	{1 2 3 4}
-employee_name	{Dominik_Schmidt Mathias_Heinrich Andreas_Renner Marcus_Kaiser}
-employee_status	{fulltime parttime parttime fulltime}
-*/
+	//Result set for the select query of (std::map<std::string,std::vector<std::string>>)
+	/*
+	employee_id		{1 2 3 4}
+	employee_name	{Dominik_Schmidt Mathias_Heinrich Andreas_Renner Marcus_Kaiser}
+	employee_status	{fulltime parttime parttime fulltime}
+	*/
 
 });
 
 /** Select a dataset by column names **/
+
 database::Query query_create_database = "create database company";
 database::Query query_create_container = "create container company.employee(employee_id integer,employee_name string,employee_status string)";
+
 std::vector<database::Query> insert_queries = {
     "insert into company.employee values(employee_id:1,employee_name:Dominik_Schimdt,employee_status:fulltime)",
     "insert into company.employee values(employee_id:2,employee_name:Heinrich_Keil,employee_status:parttime)",
     "insert into company.employee values(employee_id:3,employee_name:Mathias_Rheinlein,employee_status:parttime)",
     "insert into company.employee values(employee_id:4,employee_name:Marcus_Eisermann,employee_status:fulltime)"
 };
+
 database_engine.ExecuteForDataDefinition(query_create_database,[&](auto database_created){ /*pass*/ });
 database_engine.ExecuteForDataDefinition(query_create_container,[&](auto container_created){ /*pass*/ });
+
 std::for_each(insert_queries.begin(),insert_queries.end(),[&](auto query) {
    database_engine.ExecuteForDataManipulation(query,[&](auto query_result) {
       /*pass*/
@@ -190,48 +199,73 @@ std::for_each(insert_queries.begin(),insert_queries.end(),[&](auto query) {
 database::Query query_select_dataset1 = "select employee_id,employee_name from company.employee";
 database_engine.ExecuteForDataManipulation(query_select_dataset1,[&](auto query_result) {
 
-//Result set for the select query, which has the type std::map<std::string,std::vector<std::string>>
-
-/*
-employee_id	{1 2 3 4}
-employee_name	{Dominik_Schimdt Heinrich_Keil Mathias_Rheinlein Marcus_Eisermann}
-*/
-
+	//Result set for the select query of (std::map<std::string,std::vector<std::string>>)
+	/*
+	employee_id		{1 2 3 4}
+	employee_name	{Dominik_Schimdt Heinrich_Keil Mathias_Rheinlein Marcus_Eisermann}
+	*/
 });
 
-/** Select records by a single criterion **/
+
+/** Select records by criteria **/
+
 database::Query query_create_database = "create database university";
-database::Query query_create_container = "create container university.student (student_id integer,student_name string,student_dob string,student_gender string";
+database::Query query_create_container = "create container university.student (student_id integer,student_name string,student_dob string,student_gender string, student_country string";
 std::vector<database::Query> insert_queries = {
-    "insert into university.student values(student_id:1,student_name:Markus_Eisermann,student_dob:19920312,student_gender:male)",
-    "insert into university.student values(student_id:2,student_name:Ulrike_Von_Stryk,student_dob:19871112,student_gender:female)",
-    "insert into university.student values(student_id:3,student_name:Dominik_Vlad,student_dob:19900821,student_gender:male)",
-    "insert into university.student values(student_id:4,student_name:Mathias_Zeug,student_dob:19840918,student_gender:male)",
-    "insert into university.student values(student_id:5,student_name:Kerstin_Peh,student_dob:19930611,student_gender:female)",
-    "insert into university.student values(student_id:6,student_name:Tanja_Schimdt,student_dob:19951201,student_gender:female)",
-    "insert into university.student values(student_id:7,student_name:Anna_Graser,student_dob:19890401,student_gender:female)",
-    "insert into university.student values(student_id:8,student_name:Martin_Kaiser,student_dob:19840310,student_gender:male)",
+    "insert into university.student values(student_id:1,student_name:Markus_Eisermann,student_dob:19920312,student_gender:male,student_country:DE)",
+    "insert into university.student values(student_id:2,student_name:Ulrike_Von_Stryk,student_dob:19871112,student_gender:female,student_country:FR)",
+    "insert into university.student values(student_id:3,student_name:Dominik_Vlad,student_dob:19900821,student_gender:male,student_country:FR)",
+    "insert into university.student values(student_id:4,student_name:Mathias_Zeug,student_dob:19840918,student_gender:male,student_country:DE)",
+    "insert into university.student values(student_id:5,student_name:Kerstin_Peh,student_dob:19930611,student_gender:female,student_country:ES)",
+    "insert into university.student values(student_id:6,student_name:Tanja_Schimdt,student_dob:19951201,student_gender:female,student_country:DE)",
+    "insert into university.student values(student_id:7,student_name:Anna_Graser,student_dob:19890401,student_gender:female,student_country:FR)",
+    "insert into university.student values(student_id:8,student_name:Martin_Kaiser,student_dob:19840310,student_gender:male,student_country:ES)",
 };
 
+database::DatabaseEngine database_engine;
 database_engine.ExecuteForDataDefinition(query_create_database,[&](auto database_created) { /*pass*/ });
 database_engine.ExecuteForDataDefinition(query_create_container,[&](auto container_created) { /*pass*/ });
+  
 std::for_each(insert_queries.begin(),insert_queries.end(),[&](auto query) {
-   database_engine.ExecuteForDataManipulation(query,[&](auto query_result) {
-      /*pass*/
-   });
+	database_engine.ExecuteForDataManipulation(query,[&](auto query_result) { /*pass*/ });
 });
 
 database::Query select_query1 = "select * from university.student where student_gender = female";
+
 database_engine.ExecuteForDataManipulation(select_query1,[&](auto query_result) {
 
-//Result set for the select query, which has the type std::map<std::string,std::vector<std::string>>
+	//Result set for the select query of (std::map<std::string,std::vector<std::string>>)
+	/*
+	student_country		{FR ES DE FR }
+	student_dob			{19871112 19930611 19951201 19890401 }
+	student_gender		{female female female female }
+	student_id			{2 5 6 7 }
+	student_name		{Ulrike_Von_Stryk Kerstin_Peh Tanja_Schimdt Anna_Graser }
+	*/
 
-/*
-student_dob	{19871112 19930611 19951201 19890401}
-student_gender	{female female female female}
-student_id	{2 5 6 7}
-student_name	{Ulrike_Von_Stryk Kerstin_Peh Tanja_Schimdt Anna_Graser}
-*/
+});
+
+database::Query select_query2 = "select student_id,student_name from university.student where student_dob > 19840918 and student_dob < 19930611";
+
+database_engine.ExecuteForDataManipulation(select_query2,[&](auto query_result) {
+
+	//Result set for the select query of (std::map<std::string,std::vector<std::string>>)
+	/*
+	student_id		{1 2 3 7 }
+	student_name	{Markus_Eisermann Ulrike_Von_Stryk Dominik_Vlad Anna_Graser }
+	*/
+
+});
+
+database::Query select_query3 = "select student_name,student_dob from university.student where student_country <> de and student_country <> es";
+
+database_engine.ExecuteForDataManipulation(select_query3,[&](auto query_result) {
+
+	//Result set for the select query of (std::map<std::string,std::vector<std::string>>)
+	/*
+	student_dob		{19871112 19900821 19890401 }
+	student_name	{Ulrike_Von_Stryk Dominik_Vlad Anna_Graser }
+	*/
 
 });
 
